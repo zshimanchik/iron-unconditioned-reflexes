@@ -1,4 +1,5 @@
 ﻿from math import sqrt
+from threading import Thread
 
 from random import randint, random
 from Animal import Animal, Food
@@ -13,35 +14,33 @@ class World(object):
     MAX_EATING_DISTANCE = 20
     EATING_VALUE = 0.03
 
+    APPEAR_FOOD_COUNT = 3
+    APPEAR_FOOD_SIZE_MIN = 6
+    APPEAR_FOOD_SIZE_MAX = 10
+
     def __init__(self, width, height):
         self.width = width
         self.height = height
 
         self.restart()
-        self.food_timer = 20
+        self.food_timer = 10
 
     def restart(self):
-        self.animals = [Animal(self) for _ in range(10)]
+        self.animals = [Animal(self) for _ in range(30)]
         self.animals_to_add = []
-        self.food = [Food(randint(3, self.width), randint(3, self.height), randint(4,10)) for _ in range(40)]
+        self.food = [Food(randint(3, self.width), randint(3, self.height), randint(World.APPEAR_FOOD_SIZE_MIN, World.APPEAR_FOOD_SIZE_MAX)) for _ in range(60)]
 
         self.time = 0
 
     def update(self):
         self.time += 1
+
         for food in self.food:
             self.check_animal_in_bounds(food)
 
-        for animal in self.animals:
-            self.check_animal_in_bounds(animal)
-            sensor_values = map(self.get_sensor_value, animal.sensors_positions)
-
-            food = self.get_closest_food(animal.x, animal.y, World.MAX_EATING_DISTANCE)
-            if food:
-                animal.eat(food)
-
-            animal.update(sensor_values)
-
+        threads = self.make_workers(self.animal_worker, 3, self.animals)
+        for t in threads:
+            t.join()        
 
         self.animals.extend(self.animals_to_add)
         self.animals_to_add = []
@@ -50,14 +49,41 @@ class World(object):
 
         # add some food some fixed time
         if self.time % self.food_timer == 0:
-            for _ in range(3):
-                self.food.append(Food(randint(0, self.width), randint(0, self.height), randint(2,6)))
+            for _ in range(World.APPEAR_FOOD_COUNT):
+                self.food.append(Food(randint(0, self.width), randint(0, self.height), randint(World.APPEAR_FOOD_SIZE_MIN, World.APPEAR_FOOD_SIZE_MAX)))
+
+
+    def animal_worker(self, animals, start, end):
+        for i in range(start, end):
+            animal = animals[i]
+            self.check_animal_in_bounds(animal)
+
+            sensor_values = map(self.get_sensor_value, animal.sensors_positions)
+            animal.sensor_values = sensor_values
+            food = self.get_closest_food(animal.x, animal.y, World.MAX_EATING_DISTANCE)
+            if food:
+                animal.eat(food)
+            animals[i].update()
+
+    def make_workers(self, worker, thread_count, animals):
+        threads = []
+        np  =  len(animals)/thread_count
+        for i in range(thread_count):
+            t =  Thread(target=worker, args=[animals, np*i, np*(i+1)])
+            t.start()
+            threads.append(t)
+        return threads
 
     def get_sensor_value(self, pos):
         max_smell = 0
         for food in self.food:
-            if food.size > 0:
-                max_smell = max(max_smell, 1.0 - distance(food.x, food.y, pos[0], pos[1]) / food.smell_size)
+            #food.lock.acquire()
+            if food.smell_size > 0:
+                try:
+                    max_smell = max(max_smell, 1.0 - distance(food.x, food.y, pos[0], pos[1]) / food.smell_size)
+                except ZeroDivisionError:
+                    pass
+            #food.lock.release()
         return max_smell
 
     def get_closest_food(self, x, y, max_distance):

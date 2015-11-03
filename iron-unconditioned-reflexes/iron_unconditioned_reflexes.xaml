@@ -5,8 +5,16 @@
     <Grid x:Name="grid" Margin="0,0,0,0">
         <DockPanel x:Name="dock_panel" LastChildFill="True">
             <Grid DockPanel.Dock="Right" Width="300"  Background="#FFDEF9DC" Panel.ZIndex="1">
-                <Slider x:Name="timer_slider" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="267" Interval="1" Maximum="300" Minimum="1" ValueChanged="timer_slider_ValueChanged" SmallChange="5" LargeChange="30" Value="40"/>
-                <Slider x:Name="scale_slider" HorizontalAlignment="Left" Height="26" Margin="0,26,0,0" VerticalAlignment="Top" Width="267" Interval="1" Maximum="3" Minimum="0.3" ValueChanged="scale_slider_ValueChanged" Value="1" SelectionEnd="1" SelectionStart="1"/>
+                <Slider x:Name="timer_slider" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="203" Interval="1" Maximum="300" Minimum="1" ValueChanged="timer_slider_ValueChanged" SmallChange="5" LargeChange="30" Value="10" Margin="94,0,0,0"/>
+                <Slider x:Name="scale_slider" HorizontalAlignment="Left" Height="26" Margin="94,26,0,0" VerticalAlignment="Top" Width="203" Interval="1" Maximum="3" Minimum="0.3" ValueChanged="scale_slider_ValueChanged" Value="1" SelectionEnd="1" SelectionStart="1"/>
+                <Slider x:Name="food_slider" HorizontalAlignment="Left" Margin="94,49,0,0" VerticalAlignment="Top" Width="203" Minimum="5" Maximum="500" SmallChange="5" Value="80" ValueChanged="food_slider_ValueChanged"/>
+                <TextBlock x:Name="label" Text="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,77,0,0"/>
+                <TextBlock x:Name="label1" Text="Label" HorizontalAlignment="Left" Margin="0,103,0,0" VerticalAlignment="Top"/>
+                <TextBlock Text="{Binding Path=Value, ElementName=timer_slider, StringFormat=Timer: {0:#}}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Text="{Binding Path=Value, ElementName=scale_slider, StringFormat=Scale: {0:#.##}}" HorizontalAlignment="Left" Margin="0,26,0,0" VerticalAlignment="Top"/>
+                <TextBlock Text="{Binding Path=Value, ElementName=food_slider, StringFormat=Food: {0:#}}" HorizontalAlignment="Left" Margin="0,55,0,0" VerticalAlignment="Top"/>
+                <TextBlock x:Name="label4" Text="Label" HorizontalAlignment="Left" Margin="0,129,0,0" VerticalAlignment="Top"/>                
+                
             </Grid>
             <Canvas x:Name="parent_canvas" DockPanel.Dock="Left">
                 <Canvas x:Name="canvas" SizeChanged="canvas_SizeChanged" Background="#FFD8D8D8" MouseMove="canvas_MouseMove" MouseWheel="canvas_MouseWheel" Width="{Binding ActualWidth, ElementName=parent_canvas, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=parent_canvas, Mode=OneWay}" MouseLeave="canvas_MouseLeave" MouseRightButtonDown="canvas_MouseRightButtonDown" MouseRightButtonUp="canvas_MouseRightButtonUp">

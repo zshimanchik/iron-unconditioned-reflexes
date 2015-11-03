@@ -1,5 +1,6 @@
 ﻿import math
 from random import random, randint
+#from threading import Lock
 
 from NeuralNetwork.NeuralNetwork import NeuralNetwork
 from NeuralNetwork.Neuron import Neuron
@@ -15,10 +16,13 @@ class Food(object):
         self.y = y
         self._size = size
         self._smell_size = self._size * Food.SMELL_SIZE_RATIO
+        #self.lock = Lock()
 
-    def beating(self, size):
-        value = min(self.size, size)
-        self.size -= value
+    def beating(self, value):
+        #self.lock.acquire()
+        real_value = min(self.size, value)
+        self.size -= real_value
+        #self.lock.release()
         return value
 
     @property
@@ -27,7 +31,7 @@ class Food(object):
 
     @size.setter
     def size(self, value):
-        self._size = value
+        self._size = max(0, value)
         self._smell_size = self._size * Food.SMELL_SIZE_RATIO
 
     @property
@@ -106,8 +110,7 @@ class Animal(object):
             self._sensors_positions_calculated = True
         return self._sensors_positions
 
-    def update(self, sensor_values):
-        self.sensor_values = sensor_values
+    def update(self):
         answer = self.brain.calculate(self.sensor_values)
         self.answer = answer
 

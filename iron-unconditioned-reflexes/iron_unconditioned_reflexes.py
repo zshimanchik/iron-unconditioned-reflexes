@@ -9,6 +9,7 @@ from System.Windows.Controls import Grid, Canvas
 from System.Windows.Media import Brushes, ScaleTransform, TranslateTransform, RotateTransform, TransformGroup
 
 import math
+from time import time
 from random import random, randint
 
 import World
@@ -23,6 +24,7 @@ class MyWindow(Window):
         self.timer.Tick += self.dispatcherTimer_Tick
         self.timer.Interval = TimeSpan(0, 0, 0, 0, 100)
         self.timer.Start()
+        self.start_time = time()
 
         self.window = wpf.LoadComponent(self, 'iron_unconditioned_reflexes.xaml')        
 
@@ -61,7 +63,14 @@ class MyWindow(Window):
         return canvas
 
 
-    def dispatcherTimer_Tick(self, sender, e):
+    def dispatcherTimer_Tick(self, sender, e):        
+        if (self.world.time % 10 == 0):
+            performance = (time() - self.start_time) / 10.0
+            self.label1.Text = "performance={}".format(performance)
+            self.start_time = time()
+
+        self.label.Text = "world time={}".format(self.world.time)
+        self.label4.Text = "animal count={}\nfood count={}".format(len(self.world.animals), len(self.world.food))
         self.world.update()
         self.draw()
 
@@ -119,14 +128,14 @@ class MyWindow(Window):
                 left = 0
             if float.IsNaN(top):
                 top = 0
-            print(str(left), str(top))
             self.parent_canvas.SetLeft(self.canvas, left + point.X - self.mouse_start_point.X)
             self.parent_canvas.SetTop(self.canvas, top + point.Y - self.mouse_start_point.Y)
     
-    def canvas_MouseWheel(self, sender, e):
-        delta = (e.Delta/120)*0.3
-        print(delta)
-        self.scale_slider.Value += delta
+    def canvas_MouseWheel(self, sender, e):        
+        self.scale_slider.Value += (e.Delta/120)*0.3
+    
+    def food_slider_ValueChanged(self, sender, e):
+        self.world.food_timer = int(sender.Value)
         
 
         
