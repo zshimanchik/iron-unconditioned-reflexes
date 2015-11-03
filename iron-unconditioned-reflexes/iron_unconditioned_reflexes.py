@@ -1,6 +1,5 @@
 ﻿import wpf
 
-
 from System import TimeSpan
 from System.Windows import Application, Window, Point
 from System.Windows.Threading import DispatcherTimer
@@ -14,6 +13,7 @@ from random import random, randint
 
 import World
 
+
 class MyWindow(Window):
     def __init__(self):        
         self.mouse_drag = False
@@ -26,16 +26,17 @@ class MyWindow(Window):
         self.timer.Start()
         self.start_time = time()
 
-        self.window = wpf.LoadComponent(self, 'iron_unconditioned_reflexes.xaml')        
+        self.window = wpf.LoadComponent(self, 'iron_unconditioned_reflexes.xaml') 
+        self.world.food_timer = self.food_slider.Value
 
-    def make_food_shape(self, x, y, size):        
+
+    def make_food_shape(self, x, y, size):
         el = Ellipse()
         el.Fill = Brushes.Gray
         el.Height=1
         el.Width=1
         #el.RenderTransform = TranslateTransform(-0.5, -0.5)
         return el
-
 
 
     def make_animal_shape(self, x, y, size, brush):
@@ -83,7 +84,7 @@ class MyWindow(Window):
             tg.Children.Add(ScaleTransform(10, 10))
             tg.Children.Add(RotateTransform(math.degrees(animal.angle)))
             tg.Children.Add(TranslateTransform(animal.x, animal.y))
-            animal.shape.RenderTransform = tg
+            animal.shape.RenderTransform = tg            
             self.canvas.Children.Add(animal.shape)
 
         for food in self.world.food:

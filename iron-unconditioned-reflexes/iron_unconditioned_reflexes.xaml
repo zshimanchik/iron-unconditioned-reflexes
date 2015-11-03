@@ -13,8 +13,8 @@
                 <TextBlock Text="{Binding Path=Value, ElementName=timer_slider, StringFormat=Timer: {0:#}}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 <TextBlock Text="{Binding Path=Value, ElementName=scale_slider, StringFormat=Scale: {0:#.##}}" HorizontalAlignment="Left" Margin="0,26,0,0" VerticalAlignment="Top"/>
                 <TextBlock Text="{Binding Path=Value, ElementName=food_slider, StringFormat=Food: {0:#}}" HorizontalAlignment="Left" Margin="0,55,0,0" VerticalAlignment="Top"/>
-                <TextBlock x:Name="label4" Text="Label" HorizontalAlignment="Left" Margin="0,129,0,0" VerticalAlignment="Top"/>                
-                
+                <TextBlock x:Name="label4" Text="Label" HorizontalAlignment="Left" Margin="0,129,0,0" VerticalAlignment="Top"/>
+
             </Grid>
             <Canvas x:Name="parent_canvas" DockPanel.Dock="Left">
                 <Canvas x:Name="canvas" SizeChanged="canvas_SizeChanged" Background="#FFD8D8D8" MouseMove="canvas_MouseMove" MouseWheel="canvas_MouseWheel" Width="{Binding ActualWidth, ElementName=parent_canvas, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=parent_canvas, Mode=OneWay}" MouseLeave="canvas_MouseLeave" MouseRightButtonDown="canvas_MouseRightButtonDown" MouseRightButtonUp="canvas_MouseRightButtonUp">
@@ -31,7 +31,14 @@
                         </Line>
                     </Canvas>
                     <Ellipse Fill="Yellow" HorizontalAlignment="Left" Height="31" Stroke="Black" StrokeThickness="2" VerticalAlignment="Top" Width="33" Canvas.Left="57" Canvas.Top="147"/>
-                    <Ellipse x:Name="el1" HorizontalAlignment="Left" Height="33" Stroke="Black" StrokeThickness="2" VerticalAlignment="Top" Width="37" Canvas.Left="40" Canvas.Top="73"/>
+                    <Ellipse x:Name="el1" HorizontalAlignment="Left" Height="89" Stroke="Black" StrokeThickness="2" VerticalAlignment="Top" Width="89" Canvas.Left="40" Canvas.Top="73">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#FF00DC14" Offset="0"/>
+                                <GradientStop Color="#00000000" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                    </Ellipse>
                 </Canvas>
             </Canvas>
         </DockPanel>

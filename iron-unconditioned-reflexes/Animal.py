@@ -10,12 +10,11 @@ TWO_PI = math.pi * 2
 
 
 class Food(object):
-    SMELL_SIZE_RATIO = 13.0
     def __init__(self, x, y, size):
         self.x = x
         self.y = y
         self._size = size
-        self._smell_size = self._size * Food.SMELL_SIZE_RATIO
+        self._smell_size = self._size * World.World.SMELL_SIZE_RATIO
         #self.lock = Lock()
 
     def beating(self, value):
@@ -32,7 +31,7 @@ class Food(object):
     @size.setter
     def size(self, value):
         self._size = max(0, value)
-        self._smell_size = self._size * Food.SMELL_SIZE_RATIO
+        self._smell_size = self._size * World.World.SMELL_SIZE_RATIO
 
     @property
     def smell_size(self):

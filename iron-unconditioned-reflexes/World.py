@@ -13,6 +13,7 @@ class World(object):
     MAX_ANIMAL_COUNT = 100
     MAX_EATING_DISTANCE = 20
     EATING_VALUE = 0.03
+    SMELL_SIZE_RATIO = 13.0
 
     APPEAR_FOOD_COUNT = 3
     APPEAR_FOOD_SIZE_MIN = 6
@@ -23,7 +24,7 @@ class World(object):
         self.height = height
 
         self.restart()
-        self.food_timer = 10
+        self.food_timer = 80
 
     def restart(self):
         self.animals = [Animal(self) for _ in range(30)]
