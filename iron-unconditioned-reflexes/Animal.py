@@ -61,11 +61,13 @@ class Animal(object):
     HALF_MUTATE_VALUE = MUTATE_VALUE / 2
     MUTATE_CHANCE = 0.6
 
+    SIZE = 7
+
     def __init__(self, world):
         self.world = world
         self._x = randint(0, self.world.width)
         self._y = randint(0, self.world.height)
-        self.size = 7
+        self.size = Animal.SIZE
         self.angle = 0
 
         self.sensor_count = 7

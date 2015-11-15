@@ -8,7 +8,6 @@ from Animal import Animal, Food
 def distance(x1, y1, x2, y2):
     return sqrt((x1-x2)**2 + (y1-y2)**2)
 
-
 class World(object):
     MAX_ANIMAL_COUNT = 100
     MAX_EATING_DISTANCE = 20
@@ -18,7 +17,9 @@ class World(object):
     APPEAR_FOOD_COUNT = 3
     APPEAR_FOOD_SIZE_MIN = 6
     APPEAR_FOOD_SIZE_MAX = 10
-
+    
+    CHUNK_SIZE = max(APPEAR_FOOD_SIZE_MAX*SMELL_SIZE_RATIO + Animal.SIZE, MAX_EATING_DISTANCE)
+    
     def __init__(self, width, height):
         self.width = width
         self.height = height
@@ -27,18 +28,41 @@ class World(object):
         self.food_timer = 80
 
     def restart(self):
-        self.animals = [Animal(self) for _ in range(30)]
+        self.animals = [Animal(self) for _ in range(20)]
         self.animals_to_add = []
-        self.food = [Food(randint(3, self.width), randint(3, self.height), randint(World.APPEAR_FOOD_SIZE_MIN, World.APPEAR_FOOD_SIZE_MAX)) for _ in range(60)]
-
+        self.food = [Food(randint(3, self.width), randint(3, self.height), randint(World.APPEAR_FOOD_SIZE_MIN, World.APPEAR_FOOD_SIZE_MAX)) for _ in range(80)]
+        self.chunks = [[[]]]
         self.time = 0
+
+    def adjacent_chunks(self, row, col):
+         r, c = row - 1, col -1
+         for i in range(9):
+             ri = r + i/3
+             ci = c + i%3
+             if ri >= 0 and ci >= 0 and ri < len(self.chunks) and ci < len(self.chunks[0]):
+                yield (r + i/3, c + i%3)
+
+    def get_chunk_index(self, x, y):
+        return (int(y/self.CHUNK_SIZE), int(x/self.CHUNK_SIZE))
+
+    def adjacent_food(self, x, y):
+        for chunk_row, chunk_col in self.adjacent_chunks(*self.get_chunk_index(x, y)):
+            chunk = self.chunks[chunk_row][chunk_col]
+            for food in chunk:
+                yield food
 
     def update(self):
         self.time += 1
+        self.chunks = [
+            [[] for _ in range(int(self.width/self.CHUNK_SIZE)+1)] 
+            for _ in range(int(self.height/self.CHUNK_SIZE)+1) 
+        ]
 
         for food in self.food:
-            self.check_animal_in_bounds(food)
-
+            self.check_in_bounds(food)
+            food.chunk = self.get_chunk_index(food.x, food.y)
+            self.chunks[food.chunk[0]][food.chunk[1]].append(food)
+        
         threads = self.make_workers(self.animal_worker, 3, self.animals)
         for t in threads:
             t.join()        
@@ -57,7 +81,7 @@ class World(object):
     def animal_worker(self, animals, start, end):
         for i in range(start, end):
             animal = animals[i]
-            self.check_animal_in_bounds(animal)
+            self.check_in_bounds(animal)
 
             sensor_values = map(self.get_sensor_value, animal.sensors_positions)
             animal.sensor_values = sensor_values
@@ -77,27 +101,25 @@ class World(object):
 
     def get_sensor_value(self, pos):
         max_smell = 0
-        for food in self.food:
-            #food.lock.acquire()
+        for food in self.adjacent_food(*pos):
             if food.smell_size > 0:
                 try:
                     max_smell = max(max_smell, 1.0 - distance(food.x, food.y, pos[0], pos[1]) / food.smell_size)
                 except ZeroDivisionError:
                     pass
-            #food.lock.release()
         return max_smell
 
     def get_closest_food(self, x, y, max_distance):
         min_dist = 10000
         res = None
-        for food in self.food:
+        for food in self.adjacent_food(x, y):
             dist = distance(x,y, food.x, food.y)
             if dist <= food.size+max_distance and dist < min_dist:
                 min_dist = dist
                 res = food
         return res
 
-    def check_animal_in_bounds(self, animal):
+    def check_in_bounds(self, animal):
         if animal.x > self.width:
             animal.x = self.width
         if animal.x < 0:

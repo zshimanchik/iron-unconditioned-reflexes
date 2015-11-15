@@ -1,11 +1,11 @@
 ﻿<Window 
        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-       Title="iron-unconditioned-reflexes" Height="307.091" Width="609.221">
+       Title="iron-unconditioned-reflexes" Height="245.091" Width="767.221">
     <Grid x:Name="grid" Margin="0,0,0,0">
         <DockPanel x:Name="dock_panel" LastChildFill="True">
             <Grid DockPanel.Dock="Right" Width="300"  Background="#FFDEF9DC" Panel.ZIndex="1">
-                <Slider x:Name="timer_slider" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="203" Interval="1" Maximum="300" Minimum="1" ValueChanged="timer_slider_ValueChanged" SmallChange="5" LargeChange="30" Value="10" Margin="94,0,0,0"/>
+                <Slider x:Name="timer_slider" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="203" Interval="1" Maximum="300" Minimum="1" ValueChanged="timer_slider_ValueChanged" SmallChange="5" LargeChange="30" Value="1" Margin="94,0,0,0"/>
                 <Slider x:Name="scale_slider" HorizontalAlignment="Left" Height="26" Margin="94,26,0,0" VerticalAlignment="Top" Width="203" Interval="1" Maximum="3" Minimum="0.3" ValueChanged="scale_slider_ValueChanged" Value="1" SelectionEnd="1" SelectionStart="1"/>
                 <Slider x:Name="food_slider" HorizontalAlignment="Left" Margin="94,49,0,0" VerticalAlignment="Top" Width="203" Minimum="5" Maximum="500" SmallChange="5" Value="80" ValueChanged="food_slider_ValueChanged"/>
                 <TextBlock x:Name="label" Text="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,77,0,0"/>
@@ -14,6 +14,7 @@
                 <TextBlock Text="{Binding Path=Value, ElementName=scale_slider, StringFormat=Scale: {0:#.##}}" HorizontalAlignment="Left" Margin="0,26,0,0" VerticalAlignment="Top"/>
                 <TextBlock Text="{Binding Path=Value, ElementName=food_slider, StringFormat=Food: {0:#}}" HorizontalAlignment="Left" Margin="0,55,0,0" VerticalAlignment="Top"/>
                 <TextBlock x:Name="label4" Text="Label" HorizontalAlignment="Left" Margin="0,129,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="chunks_checkBox" Content="draw chunks" HorizontalAlignment="Left" Margin="207,80,0,0" VerticalAlignment="Top"/>
 
             </Grid>
             <Canvas x:Name="parent_canvas" DockPanel.Dock="Left">

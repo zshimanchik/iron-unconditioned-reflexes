@@ -17,8 +17,8 @@ import World
 class MyWindow(Window):
     def __init__(self):        
         self.mouse_drag = False
+        self.world = World.World(400, 200)
         self.mouse_start_point = Point(0, 0)
-        self.world = World.World(200, 200)
         
         self.timer= DispatcherTimer()        
         self.timer.Tick += self.dispatcherTimer_Tick
@@ -27,7 +27,19 @@ class MyWindow(Window):
         self.start_time = time()
 
         self.window = wpf.LoadComponent(self, 'iron_unconditioned_reflexes.xaml') 
+        self.timer.Interval = TimeSpan(0, 0, 0, 0, self.timer_slider.Value)
         self.world.food_timer = self.food_slider.Value
+        
+    def add_line(self, x1, y1, x2, y2):
+        ln = Line()
+        ln.X1 = x1
+        ln.Y1 = y1
+        ln.X2 = x2
+        ln.Y2 = y2
+        ln.StrokeThickness = 0.1
+        ln.Stroke = Brushes.Gray
+        self.canvas.Children.Add(ln)
+        
 
 
     def make_food_shape(self, x, y, size):
@@ -77,6 +89,14 @@ class MyWindow(Window):
 
     def draw(self):
         self.canvas.Children.Clear()
+
+        if self.chunks_checkBox.IsChecked:
+            for row in range(1, int(self.world.height / self.world.CHUNK_SIZE)+1):
+                self.add_line(0, self.world.CHUNK_SIZE * row, self.world.width, self.world.CHUNK_SIZE * row)
+
+            for col in range(1, int(self.world.width/ self.world.CHUNK_SIZE)+1):
+                self.add_line(self.world.CHUNK_SIZE * col, 0, self.world.CHUNK_SIZE * col, self.world.height)
+
         for animal in self.world.animals:
             if not hasattr(animal, 'shape'):
                 animal.shape = self.make_animal_shape(animal.x, animal.y, animal.size, Brushes.Green)
