@@ -1,5 +1,6 @@
 ﻿from math import sqrt
 from threading import Thread
+from Queue import Queue
 
 from random import randint, random
 from Animal import Animal, Food
@@ -9,6 +10,8 @@ def distance(x1, y1, x2, y2):
     return sqrt((x1-x2)**2 + (y1-y2)**2)
 
 class World(object):
+    THREADS_COUNT = 3
+
     MAX_ANIMAL_COUNT = 100
     MAX_EATING_DISTANCE = 20
     EATING_VALUE = 0.03
@@ -27,29 +30,21 @@ class World(object):
         self.restart()
         self.food_timer = 80
 
+        self.queue = Queue()
+        self.threads = []
+        for _ in range(World.THREADS_COUNT):
+            t = Thread(target=self.animal_worker, args=[self.queue])
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+ 
+
     def restart(self):
         self.animals = [Animal(self) for _ in range(20)]
         self.animals_to_add = []
         self.food = [Food(randint(3, self.width), randint(3, self.height), randint(World.APPEAR_FOOD_SIZE_MIN, World.APPEAR_FOOD_SIZE_MAX)) for _ in range(80)]
         self.chunks = [[[]]]
         self.time = 0
-
-    def adjacent_chunks(self, row, col):
-         r, c = row - 1, col -1
-         for i in range(9):
-             ri = r + i/3
-             ci = c + i%3
-             if ri >= 0 and ci >= 0 and ri < len(self.chunks) and ci < len(self.chunks[0]):
-                yield (r + i/3, c + i%3)
-
-    def get_chunk_index(self, x, y):
-        return (int(y/self.CHUNK_SIZE), int(x/self.CHUNK_SIZE))
-
-    def adjacent_food(self, x, y):
-        for chunk_row, chunk_col in self.adjacent_chunks(*self.get_chunk_index(x, y)):
-            chunk = self.chunks[chunk_row][chunk_col]
-            for food in chunk:
-                yield food
 
     def update(self):
         self.time += 1
@@ -62,10 +57,10 @@ class World(object):
             self.check_in_bounds(food)
             food.chunk = self.get_chunk_index(food.x, food.y)
             self.chunks[food.chunk[0]][food.chunk[1]].append(food)
-        
-        threads = self.make_workers(self.animal_worker, 3, self.animals)
-        for t in threads:
-            t.join()        
+
+        for animal in self.animals:
+            self.queue.put(animal)
+        self.queue.join()
 
         self.animals.extend(self.animals_to_add)
         self.animals_to_add = []
@@ -76,11 +71,11 @@ class World(object):
         if self.time % self.food_timer == 0:
             for _ in range(World.APPEAR_FOOD_COUNT):
                 self.food.append(Food(randint(0, self.width), randint(0, self.height), randint(World.APPEAR_FOOD_SIZE_MIN, World.APPEAR_FOOD_SIZE_MAX)))
-
-
-    def animal_worker(self, animals, start, end):
-        for i in range(start, end):
-            animal = animals[i]
+                
+    
+    def animal_worker(self, queue):
+        while True:
+            animal = queue.get()
             self.check_in_bounds(animal)
 
             sensor_values = map(self.get_sensor_value, animal.sensors_positions)
@@ -88,16 +83,8 @@ class World(object):
             food = self.get_closest_food(animal.x, animal.y, World.MAX_EATING_DISTANCE)
             if food:
                 animal.eat(food)
-            animals[i].update()
-
-    def make_workers(self, worker, thread_count, animals):
-        threads = []
-        np  =  len(animals)/thread_count
-        for i in range(thread_count):
-            t =  Thread(target=worker, args=[animals, np*i, np*(i+1)])
-            t.start()
-            threads.append(t)
-        return threads
+            animal.update()
+            queue.task_done()
 
     def get_sensor_value(self, pos):
         max_smell = 0
@@ -129,6 +116,23 @@ class World(object):
             animal.y = self.height
         if animal.y < 0:
             animal.y = 0
+
+    def adjacent_chunks(self, row, col):
+         r, c = row - 1, col -1
+         for i in range(9):
+             ri = r + i/3
+             ci = c + i%3
+             if ri >= 0 and ci >= 0 and ri < len(self.chunks) and ci < len(self.chunks[0]):
+                yield (r + i/3, c + i%3)
+
+    def get_chunk_index(self, x, y):
+        return (int(y/self.CHUNK_SIZE), int(x/self.CHUNK_SIZE))
+
+    def adjacent_food(self, x, y):
+        for chunk_row, chunk_col in self.adjacent_chunks(*self.get_chunk_index(x, y)):
+            chunk = self.chunks[chunk_row][chunk_col]
+            for food in chunk:
+                yield food
 
     def transform_dead_animals(self):
         for animal in self.animals[:]:

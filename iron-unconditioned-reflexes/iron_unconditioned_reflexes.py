@@ -83,7 +83,7 @@ class MyWindow(Window):
             self.start_time = time()
 
         self.label.Text = "world time={}".format(self.world.time)
-        self.label4.Text = "animal count={}\nfood count={}".format(len(self.world.animals), len(self.world.food))
+        self.label4.Text = "animal count={}\nfood count={}".format(len(self.world.animals), len(self.world.food))        
         self.world.update()
         self.draw()
 

@@ -5,7 +5,7 @@
     <Grid x:Name="grid" Margin="0,0,0,0">
         <DockPanel x:Name="dock_panel" LastChildFill="True">
             <Grid DockPanel.Dock="Right" Width="300"  Background="#FFDEF9DC" Panel.ZIndex="1">
-                <Slider x:Name="timer_slider" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="203" Interval="1" Maximum="300" Minimum="1" ValueChanged="timer_slider_ValueChanged" SmallChange="5" LargeChange="30" Value="1" Margin="94,0,0,0"/>
+                <Slider x:Name="timer_slider" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="203" Interval="1" Maximum="300" ValueChanged="timer_slider_ValueChanged" SmallChange="5" LargeChange="30" Margin="94,0,0,0"/>
                 <Slider x:Name="scale_slider" HorizontalAlignment="Left" Height="26" Margin="94,26,0,0" VerticalAlignment="Top" Width="203" Interval="1" Maximum="3" Minimum="0.3" ValueChanged="scale_slider_ValueChanged" Value="1" SelectionEnd="1" SelectionStart="1"/>
                 <Slider x:Name="food_slider" HorizontalAlignment="Left" Margin="94,49,0,0" VerticalAlignment="Top" Width="203" Minimum="5" Maximum="500" SmallChange="5" Value="80" ValueChanged="food_slider_ValueChanged"/>
                 <TextBlock x:Name="label" Text="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,77,0,0"/>
