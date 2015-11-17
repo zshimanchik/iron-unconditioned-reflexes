@@ -1,4 +1,4 @@
-from Layer import InputLayer, Layer, Readiness
+﻿from Layer import InputLayer, Layer, Readiness
 
 
 class NeuralNetwork:
@@ -62,5 +62,5 @@ class NeuralNetwork:
             for layer in self:
                 layer.commit_teach()
 
-            err += sum([abs(no-o) for no, o in zip(net_out, out)])
+            err += sum([(no-o) ** 2 for no, o in zip(net_out, out)])
         return err / len(database)

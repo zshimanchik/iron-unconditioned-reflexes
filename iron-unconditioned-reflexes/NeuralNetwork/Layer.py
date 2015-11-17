@@ -1,4 +1,4 @@
-from Neuron import InputNeuron, RandomNeuron, Neuron
+﻿from Neuron import InputNeuron, RandomNeuron, Neuron, BiasNeuron
 
 
 class Readiness:
@@ -90,7 +90,7 @@ class Layer(_AbstractLayer):
     """
     def __init__(self, size, input):
         _AbstractLayer.__init__(self)
-        self.input = input
+        self.input = input + [BiasNeuron()]
         self.neurons = [Neuron(len(self.input)) for _ in range(size)]
 
     def add_input(self, input):
@@ -107,7 +107,6 @@ class Layer(_AbstractLayer):
         for i in range(len(self)):
             self[i].dEdNET = (outs[i] - sample_out[i]) * (1 - outs[i]**2)
             self[i].dw = [-learn_rate * self[i].dEdNET * inp_value for inp_value in self.input_values]
-            self[i].dw0 = learn_rate * self[i].dEdNET
 
     # function for backpropagation teach algorithm
     def _get_dEdOUT(self, target_neuron):
@@ -123,8 +122,7 @@ class Layer(_AbstractLayer):
                 ))
             neuron.dEdNET = (1 - neuron.out**2) * dEdOUT
 
-            neuron.dw = [-learn_rate * neuron.dEdNET * inp_value for inp_value in self.input_values]
-            neuron.dw0 = learn_rate * neuron.dEdNET
+            neuron.dw = [-learn_rate * neuron.dEdNET * inp_value for inp_value in self.input_values]            
 
 
 class ContextLayer(_AbstractLayer):

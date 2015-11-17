@@ -181,6 +181,5 @@ def clone_brain(old_brain):
             old_neuron = old_layer[j]
             new_neuron = new_layer[j]
             if new_neuron.__class__ == Neuron:
-                new_neuron.w = [ w + (random()*Animal.MUTATE_VALUE - Animal.HALF_MUTATE_VALUE)*(random() < Animal.MUTATE_CHANCE) for w in old_neuron.w ]
-                new_neuron.w0 = old_neuron.w0 + (random()*Animal.MUTATE_VALUE - Animal.HALF_MUTATE_VALUE)*(random() < Animal.MUTATE_CHANCE)
+                new_neuron.w = [ w + (random()*Animal.MUTATE_VALUE - Animal.HALF_MUTATE_VALUE)*(random() < Animal.MUTATE_CHANCE) for w in old_neuron.w ]                
     return brain

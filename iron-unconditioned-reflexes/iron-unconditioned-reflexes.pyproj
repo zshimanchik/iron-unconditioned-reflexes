@@ -28,10 +28,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Animal.py" />
-    <Compile Include="AnimalInfoWindow.py" />
     <Compile Include="BrainTrainer.py" />
     <Compile Include="iron_unconditioned_reflexes.py" />
-    <Compile Include="MainWindow.py" />
     <Compile Include="NeuralNetwork\Layer.py" />
     <Compile Include="NeuralNetwork\NeuralNetwork.py" />
     <Compile Include="NeuralNetwork\Neuron.py" />

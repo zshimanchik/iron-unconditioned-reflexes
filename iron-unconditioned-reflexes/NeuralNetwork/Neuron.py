@@ -1,4 +1,4 @@
-from random import random
+﻿from random import random
 import math
 
 
@@ -13,9 +13,7 @@ class _AbstractNeuron():
     def __init__(self):
         self.out = 0
         self.w = []
-        self.w0 = 0
         self.dw = []
-        self.dw0 = 0
 
     def calculate(self, x):
         return self.out
@@ -28,24 +26,20 @@ class Neuron(_AbstractNeuron):
     def __init__(self, synapse_count):
         _AbstractNeuron.__init__(self)
         self.w = [random() * 0.3 - 0.15 for _ in range(synapse_count)]
-        self.w0 = random() * 0.3 - 0.15
         self.dw = [0] * synapse_count
 
     def add_synapse(self, count):
         self.w = self.w + [random() * 0.3 - 0.15 for _ in range(count)]
         self.dw = self.dw + [0]*count
         
-    def calculate(self, x):
-        net = 0
-        for i in range(len(x)):
-            net += x[i] * self.w[i]
-        self.out = th(net - self.w0)
+    def calculate(self, inp):
+        net = sum((x * w for x, w in zip(inp, self.w)))
+        self.out = th(net)
         return self.out
 
     def commit_teach(self):
         for i in range(len(self.w)):
             self.w[i] += self.dw[i]
-        self.w0 += self.dw0
         
 
 class InputNeuron(_AbstractNeuron):
