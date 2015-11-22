@@ -1,4 +1,5 @@
-﻿import math
+﻿from __future__ import division
+import math
 from random import random, randint
 #from threading import Lock
 
@@ -48,6 +49,13 @@ class Animal(object):
     MIDDLE_LAYER_NEURONS = 2
     OUTPUT_SIZE = 2
 
+    # DNA
+    DNA_BASE = 4 # must be less or equals than 10
+    DNA_VALUE_LEN = 5
+    DNA_MAX_VALUE = DNA_BASE ** DNA_VALUE_LEN
+    DNA_HALF_MAX_VALUE = int(DNA_MAX_VALUE / 2)
+    DNA_LEN = (MIDDLE_LAYER_NEURONS*(SENSOR_COUNT + 1) + OUTPUT_SIZE*(MIDDLE_LAYER_NEURONS + 1)) * DNA_VALUE_LEN
+
     # sensor_count_in_head / sensor_count
     SENSOR_COUNT_IN_HEAD_RATIO = 0.5
     # head angle
@@ -83,7 +91,8 @@ class Animal(object):
         self.readiness_to_bud = 0
 
         if not self._dna:
-            self._dna = "".join([ str(randint(0,3)) for _ in range(110) ])
+            self._dna = "".join([ str(randint(0,Animal.DNA_BASE-1)) for _ in range(Animal.DNA_LEN) ])
+            print(self._dna)
 
         self.brain = Animal.create_brain(self._dna)
         
@@ -183,9 +192,9 @@ class Animal(object):
     @staticmethod
     def create_brain(dna):
         def dna_iter(dna):
-            for i in range(0, len(dna), 5):
-                cur = dna[i:i+5]
-                yield (int(cur, 4) - 512.0) / 512.0
+            for i in range(0, len(dna), Animal.DNA_VALUE_LEN):
+                cur = dna[i:i+Animal.DNA_VALUE_LEN]
+                yield (int(cur, Animal.DNA_BASE) - Animal.DNA_HALF_MAX_VALUE) / Animal.DNA_HALF_MAX_VALUE
 
         dna = dna_iter(dna)
         brain = NeuralNetwork([Animal.SENSOR_COUNT, Animal.MIDDLE_LAYER_NEURONS, Animal.OUTPUT_SIZE])
@@ -198,11 +207,11 @@ class Animal(object):
     @staticmethod
     def brain_to_dna(brain):
         def val_to_dna(x):
-            x = max(0, int((x*512) + 512))
+            x = max(0, int((x*Animal.DNA_HALF_MAX_VALUE) + Animal.DNA_HALF_MAX_VALUE))
             res = []
             while x:
-                res.insert(0, str(x % 4))
-                x /= 4
+                res.insert(0, str(x % Animal.DNA_BASE))
+                x /= Animal.DNA_BASE
             return "".join(res)
 
         dna = []
@@ -217,5 +226,5 @@ class Animal(object):
         dna_ba = bytearray(dna)    
         for i in range(len(dna_ba)):
             if random() < Animal.MUTATE_CHANCE:
-                dna_ba[i] = ord(str(randint(0, 3)))
+                dna_ba[i] = ord(str(randint(0, Animal.DNA_BASE-1)))
         return str(dna_ba)
