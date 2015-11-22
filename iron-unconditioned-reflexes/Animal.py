@@ -71,7 +71,7 @@ class Animal(object):
 
     MUTATE_CHANCE = 0.1
 
-    SIZE = 7
+    SIZE = 10
 
     def __init__(self, world, dna=""):
         self.world = world

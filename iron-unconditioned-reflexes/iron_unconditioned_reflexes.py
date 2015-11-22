@@ -9,7 +9,6 @@ from System.Windows.Media import Brushes, ScaleTransform, TranslateTransform, Ro
 
 import math
 from time import time
-from random import random, randint
 
 import World
 
@@ -101,7 +100,7 @@ class MyWindow(Window):
             if not hasattr(animal, 'shape'):
                 animal.shape = self.make_animal_shape(animal.x, animal.y, animal.size, Brushes.Green)
             tg = TransformGroup()
-            tg.Children.Add(ScaleTransform(10, 10))
+            tg.Children.Add(ScaleTransform(animal.size, animal.size))
             tg.Children.Add(RotateTransform(math.degrees(animal.angle)))
             tg.Children.Add(TranslateTransform(animal.x, animal.y))
             animal.shape.RenderTransform = tg            
@@ -153,7 +152,7 @@ class MyWindow(Window):
             self.parent_canvas.SetTop(self.canvas, top + point.Y - self.mouse_start_point.Y)
     
     def canvas_MouseWheel(self, sender, e):        
-        self.scale_slider.Value += (e.Delta/120)*0.3
+        self.scale_slider.Value += (e.Delta/120)*0.05
     
     def food_slider_ValueChanged(self, sender, e):
         self.world.food_timer = int(sender.Value)

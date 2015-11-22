@@ -80,7 +80,7 @@ class World(object):
 
             sensor_values = map(self.get_sensor_value, animal.sensors_positions)
             animal.sensor_values = sensor_values
-            food = self.get_closest_food(animal.x, animal.y, World.MAX_EATING_DISTANCE)
+            food = self.get_closest_food(animal.x, animal.y, World.MAX_EATING_DISTANCE + animal.size)
             if food:
                 animal.eat(food)
             animal.update()
