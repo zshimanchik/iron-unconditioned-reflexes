@@ -39,10 +39,14 @@ class Food(object):
 
 
 class Animal(object):
-    DEBUG = False
     MAX_ENERGY = 30
     ENERGY_FOR_EXIST = 0.007
     MOVE_ENERGY_RATIO = 0.01
+
+    # neural_network shape
+    SENSOR_COUNT = 7
+    MIDDLE_LAYER_NEURONS = 2
+    OUTPUT_SIZE = 2
 
     # sensor_count_in_head / sensor_count
     SENSOR_COUNT_IN_HEAD_RATIO = 0.5
@@ -57,22 +61,20 @@ class Animal(object):
     MIN_CHILD_COUNT = 1
     MAX_CHILD_COUNT = 3
 
-    MUTATE_VALUE = 0.4
-    HALF_MUTATE_VALUE = MUTATE_VALUE / 2
-    MUTATE_CHANCE = 0.6
+    MUTATE_CHANCE = 0.1
 
     SIZE = 7
 
-    def __init__(self, world):
+    def __init__(self, world, dna=""):
         self.world = world
+        self._dna = dna
         self._x = randint(0, self.world.width)
         self._y = randint(0, self.world.height)
         self.size = Animal.SIZE
         self.angle = 0
 
-        self.sensor_count = 7
-        self._sensor_count_in_head = int(self.sensor_count * Animal.SENSOR_COUNT_IN_HEAD_RATIO)
-        self._sensor_count_not_in_head = self.sensor_count - self._sensor_count_in_head
+        self._sensor_count_in_head = int(self.SENSOR_COUNT * Animal.SENSOR_COUNT_IN_HEAD_RATIO)
+        self._sensor_count_not_in_head = self.SENSOR_COUNT - self._sensor_count_in_head
         self.sensor_values = []
         self._sensors_positions = []
         self._sensors_positions_calculated = False
@@ -80,10 +82,11 @@ class Animal(object):
         self.energy = self.ENERGY_FOR_BUD
         self.readiness_to_bud = 0
 
-        self.brain = NeuralNetwork([self.sensor_count, 2, 2])
-        # import BrainTrainer
-        # self.brain = clone_brain(BrainTrainer.get_new_brain(self.sensor_count))
+        if not self._dna:
+            self._dna = "".join([ str(randint(0,3)) for _ in range(110) ])
 
+        self.brain = Animal.create_brain(self._dna)
+        
     @property
     def sensors_positions(self):
         # on 45 degrees (pi/4) of main angle located 75% of all sensors
@@ -132,12 +135,13 @@ class Animal(object):
             child_count = int(self.energy / Animal.ENERGY_FOR_BUD)
             self.energy = 0
 
+        print("{}\n{}".format("="*10, self._dna))
         for _ in range(child_count):
             self.energy -= Animal.ENERGY_FOR_BUD
-            child = Animal(self.world)
+            child = Animal(self.world, Animal.mutate_dna(self.dna))
+            print(child.dna)
             child.x = self.x + randint(-30, 30)
             child.y = self.y + randint(-30, 30)
-            child.brain = clone_brain(self.brain)
             self.world.add_animal(child)
 
     def eat(self, food):
@@ -171,15 +175,47 @@ class Animal(object):
         self._y = value
         self._sensors_positions_calculated = False
 
+    @property
+    def dna(self):
+        return self._dna
 
-def clone_brain(old_brain):
-    brain = NeuralNetwork(old_brain.shape)
-    for i in range(len(old_brain)):
-        old_layer = old_brain[i]
-        new_layer = brain[i]
-        for j in range(len(old_layer)):
-            old_neuron = old_layer[j]
-            new_neuron = new_layer[j]
-            if new_neuron.__class__ == Neuron:
-                new_neuron.w = [ w + (random()*Animal.MUTATE_VALUE - Animal.HALF_MUTATE_VALUE)*(random() < Animal.MUTATE_CHANCE) for w in old_neuron.w ]                
-    return brain
+
+    @staticmethod
+    def create_brain(dna):
+        def dna_iter(dna):
+            for i in range(0, len(dna), 5):
+                cur = dna[i:i+5]
+                yield (int(cur, 4) - 512.0) / 512.0
+
+        dna = dna_iter(dna)
+        brain = NeuralNetwork([Animal.SENSOR_COUNT, Animal.MIDDLE_LAYER_NEURONS, Animal.OUTPUT_SIZE])
+        for layer in brain:
+            for neuron in layer:
+                neuron.w = [dna.next() for _ in range(len(neuron.w))]
+        return brain
+
+    # for debug
+    @staticmethod
+    def brain_to_dna(brain):
+        def val_to_dna(x):
+            x = max(0, int((x*512) + 512))
+            res = []
+            while x:
+                res.insert(0, str(x % 4))
+                x /= 4
+            return "".join(res)
+
+        dna = []
+        for layer in brain:
+            for neuron in layer:
+                for w in neuron.w:                
+                    dna.append(val_to_dna(w))
+        return "".join(dna)
+
+    @staticmethod
+    def mutate_dna(dna):
+        dna_ba = bytearray(dna)    
+        for i in range(len(dna_ba)):
+            if random() < Animal.MUTATE_CHANCE:
+                dna_ba[i] = ord(str(randint(0, 3)))
+        return str(dna_ba)
