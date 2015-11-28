@@ -3,25 +3,34 @@ from threading import Thread
 from Queue import Queue
 
 from random import randint, random
-from Animal import Animal, Food
+from Animal import Animal, Food, Gender
 
 
 def distance(x1, y1, x2, y2):
     return sqrt((x1-x2)**2 + (y1-y2)**2)
 
+
+def close_enough(animal1, animal2, max_distance):
+    return distance(animal1.x, animal1.y, animal2.x, animal2.y) < max_distance + animal1.size + animal2.size
+
+
 class World(object):
     THREADS_COUNT = 3
 
     MAX_ANIMAL_COUNT = 100
-    MAX_EATING_DISTANCE = 20
+
+    EATING_DISTANCE = 20
     EATING_VALUE = 0.03
     SMELL_SIZE_RATIO = 13.0
 
     APPEAR_FOOD_COUNT = 3
     APPEAR_FOOD_SIZE_MIN = 6
     APPEAR_FOOD_SIZE_MAX = 10
+
+    SEX_DISTANCE = 20
     
-    CHUNK_SIZE = max(APPEAR_FOOD_SIZE_MAX*SMELL_SIZE_RATIO + Animal.SIZE, MAX_EATING_DISTANCE)
+    FOOD_CHUNK_SIZE = max(APPEAR_FOOD_SIZE_MAX * SMELL_SIZE_RATIO + Animal.SIZE, EATING_DISTANCE)
+    FEMALE_CHUNK_SIZE = SEX_DISTANCE + Animal.SIZE * 2
     
     def __init__(self, width, height):
         self.width = width
@@ -40,23 +49,26 @@ class World(object):
  
 
     def restart(self):
-        self.animals = [Animal(self) for _ in range(20)]
+        self.animals = [Animal(self) for _ in range(35)]
         self.animals_to_add = []
         self.food = [Food(randint(3, self.width), randint(3, self.height), randint(World.APPEAR_FOOD_SIZE_MIN, World.APPEAR_FOOD_SIZE_MAX)) for _ in range(80)]
-        self.chunks = [[[]]]
         self.time = 0
 
     def update(self):
         self.time += 1
-        self.chunks = [
-            [[] for _ in range(int(self.width/self.CHUNK_SIZE)+1)] 
-            for _ in range(int(self.height/self.CHUNK_SIZE)+1) 
-        ]
+        self.food_chunks = self._make_empty_chunks(self.FOOD_CHUNK_SIZE)
+        self.female_chunks = self._make_empty_chunks(self.FEMALE_CHUNK_SIZE)
 
         for food in self.food:
             self.check_in_bounds(food)
-            food.chunk = self.get_chunk_index(food.x, food.y)
-            self.chunks[food.chunk[0]][food.chunk[1]].append(food)
+            chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.FOOD_CHUNK_SIZE)
+            self.food_chunks[chunk_row][chunk_col].append(food)
+
+        for animal in self.animals:
+            self.check_in_bounds(animal)
+            if animal.gender == Gender.FEMALE:
+                animal.chunk = self.get_chunk_index(animal.x, animal.y, self.FEMALE_CHUNK_SIZE)
+                self.female_chunks[animal.chunk[0]][animal.chunk[1]].append(animal)
 
         for animal in self.animals:
             self.queue.put(animal)
@@ -64,8 +76,8 @@ class World(object):
 
         self.animals.extend(self.animals_to_add)
         self.animals_to_add = []
-        self.transform_dead_animals()
-        self.clear_empty_food()
+        self._remove_dead_animals()
+        self._clear_empty_food()
 
         # add some food some fixed time
         if self.time % self.food_timer == 0:
@@ -76,13 +88,13 @@ class World(object):
     def animal_worker(self, queue):
         while True:
             animal = queue.get()
-            self.check_in_bounds(animal)
 
             sensor_values = map(self.get_sensor_value, animal.sensors_positions)
             animal.sensor_values = sensor_values
-            food = self.get_closest_food(animal.x, animal.y, World.MAX_EATING_DISTANCE + animal.size)
+            food = self.get_closest_food(animal.x, animal.y, self.EATING_DISTANCE + animal.size)
             if food:
                 animal.eat(food)
+            animal.close_females = [female for female in self.adjacent_females(animal.x, animal.y) if close_enough(animal, female, self.SEX_DISTANCE)]
             animal.update()
             queue.task_done()
 
@@ -117,33 +129,46 @@ class World(object):
         if animal.y < 0:
             animal.y = 0
 
-    def adjacent_chunks(self, row, col):
+    def _adjacent_elements(self, chunks, chunk_size, x, y):
+        for chunk_row, chunk_col in self.adjacent_chunks(chunks, *self.get_chunk_index(x, y, chunk_size)):
+            chunk = chunks[chunk_row][chunk_col]
+            for element in chunk:
+                yield element
+
+
+    def adjacent_food(self, x, y):
+        return self._adjacent_elements(self.food_chunks, self.FOOD_CHUNK_SIZE, x, y)
+
+    def adjacent_females(self, x, y):
+        return self._adjacent_elements(self.female_chunks, self.FEMALE_CHUNK_SIZE, x, y)
+
+    def adjacent_chunks(self, chunks, row, col):
          r, c = row - 1, col -1
          for i in range(9):
              ri = r + i/3
              ci = c + i%3
-             if ri >= 0 and ci >= 0 and ri < len(self.chunks) and ci < len(self.chunks[0]):
+             if 0 <= ri < len(chunks) and 0 <= ci < len(chunks[0]):
                 yield (r + i/3, c + i%3)
 
-    def get_chunk_index(self, x, y):
-        return (int(y/self.CHUNK_SIZE), int(x/self.CHUNK_SIZE))
+    def get_chunk_index(self, x, y, chunk_size):
+        return (int(y / chunk_size), int(x / chunk_size))
 
-    def adjacent_food(self, x, y):
-        for chunk_row, chunk_col in self.adjacent_chunks(*self.get_chunk_index(x, y)):
-            chunk = self.chunks[chunk_row][chunk_col]
-            for food in chunk:
-                yield food
-
-    def transform_dead_animals(self):
+    def _remove_dead_animals(self):
         for animal in self.animals[:]:
             if animal.energy <= 0:
                 # self.food.append(Food(randint(0, self.width),randint(0, self.height), animal.size))
                 self.animals.remove(animal)
 
-    def clear_empty_food(self):
+    def _clear_empty_food(self):
         for food in self.food[:]:
             if food.size <= 0:
                 self.food.remove(food)
 
     def add_animal(self, animal):
         self.animals_to_add.append(animal)
+
+    def _make_empty_chunks(self, chunk_size):
+        return [
+            [[] for _ in range(int(self.width / chunk_size) + 1)]
+            for _ in range(int(self.height / chunk_size) + 1)
+        ]

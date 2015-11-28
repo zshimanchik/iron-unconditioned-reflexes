@@ -1,7 +1,7 @@
 ﻿from __future__ import division
 import math
 from random import random, randint
-#from threading import Lock
+from threading import Lock
 
 from NeuralNetwork.NeuralNetwork import NeuralNetwork
 from NeuralNetwork.Neuron import Neuron
@@ -38,6 +38,9 @@ class Food(object):
     def smell_size(self):
         return self._smell_size
 
+class Gender:
+    FEMALE = 0
+    MALE = 1
 
 class Animal(object):
     MAX_ENERGY = 30
@@ -50,11 +53,12 @@ class Animal(object):
     OUTPUT_SIZE = 2
 
     # DNA
-    DNA_BASE = 4 # must be less or equals than 10
-    DNA_VALUE_LEN = 5
-    DNA_MAX_VALUE = DNA_BASE ** DNA_VALUE_LEN
+    DNA_BASE = 4 # must be less or equals than 10, but greater than 1
+    DNA_BRAIN_VALUE_LEN = 5
+    DNA_MAX_VALUE = DNA_BASE ** DNA_BRAIN_VALUE_LEN
     DNA_HALF_MAX_VALUE = int(DNA_MAX_VALUE / 2)
-    DNA_LEN = (MIDDLE_LAYER_NEURONS*(SENSOR_COUNT + 1) + OUTPUT_SIZE*(MIDDLE_LAYER_NEURONS + 1)) * DNA_VALUE_LEN
+    DNA_FOR_BRAIN_LEN = (MIDDLE_LAYER_NEURONS*(SENSOR_COUNT + 1) + OUTPUT_SIZE*(MIDDLE_LAYER_NEURONS + 1)) * DNA_BRAIN_VALUE_LEN
+    DNA_LEN = 1 + DNA_FOR_BRAIN_LEN
 
     # sensor_count_in_head / sensor_count
     SENSOR_COUNT_IN_HEAD_RATIO = 0.5
@@ -69,7 +73,7 @@ class Animal(object):
     MIN_CHILD_COUNT = 1
     MAX_CHILD_COUNT = 3
 
-    MUTATE_CHANCE = 0.1
+    MUTATE_CHANCE = 0.05
 
     SIZE = 10
 
@@ -89,12 +93,15 @@ class Animal(object):
 
         self.energy = self.ENERGY_FOR_BUD
         self.readiness_to_bud = 0
+        self.close_females = []
+        self.lock = Lock()
 
         if not self._dna:
             self._dna = "".join([ str(randint(0,Animal.DNA_BASE-1)) for _ in range(Animal.DNA_LEN) ])
             print(self._dna)
 
-        self.brain = Animal.create_brain(self._dna)
+        self.gender = int(self._dna[0], base=4) % 2
+        self.brain = Animal.create_brain(self._dna[1:])
         
     @property
     def sensors_positions(self):
@@ -131,11 +138,47 @@ class Animal(object):
 
         if self.energy / Animal.MAX_ENERGY > Animal.ENERGY_FULLNES_TO_BUD:
             self.readiness_to_bud += Animal.READINESS_TO_BUD_INCREASEMENT
-        if self.readiness_to_bud >= Animal.READINESS_TO_BUD_THREADSHOULD:
-            self.readiness_to_bud = 0
-            self.bud()
+
+        if self.gender == Gender.MALE and self.readiness_to_bud >= Animal.READINESS_TO_BUD_THREADSHOULD:
+            for female in self.close_females:
+                female.lock.acquire()
+                try:
+                    if female.request_for_sex(self):
+                        break
+                finally:
+                    female.lock.release()
 
         self.move(answer[0], answer[1])
+
+    def request_for_sex(self, male):
+        if self.readiness_to_bud >= Animal.READINESS_TO_BUD_THREADSHOULD:
+            self.sex(male)
+            return True
+        return False
+
+    def sex(self, father):
+        mother = self
+        child_count = randint(Animal.MIN_CHILD_COUNT, Animal.MAX_CHILD_COUNT)
+        # if it tries to birth more child than it can - bud so many as it can and die.
+        if child_count*Animal.ENERGY_FOR_BUD > mother.energy:
+            child_count = int(mother.energy / Animal.ENERGY_FOR_BUD)
+            self.energy = 0
+        if child_count*Animal.ENERGY_FOR_BUD > father.energy:
+            child_count = int(father.energy / Animal.ENERGY_FOR_BUD)
+            self.energy = 0
+
+        print("{}\n{}\n{}".format("="*10, mother.dna, father.dna))
+        for _ in range(child_count):
+            mother.energy -= Animal.ENERGY_FOR_BUD
+            father.energy -= Animal.ENERGY_FOR_BUD
+            child = Animal(self.world, Animal.mix_dna(mother.dna, father.dna))
+            print(child.dna)
+            child.x = mother.x + randint(-30, 30)
+            child.y = mother.y + randint(-30, 30)
+            self.world.add_animal(child)
+
+        mother.readiness_to_bud = 0
+        father.readiness_to_bud = 0
 
     def bud(self):
         child_count = randint(Animal.MIN_CHILD_COUNT, Animal.MAX_CHILD_COUNT)
@@ -192,8 +235,8 @@ class Animal(object):
     @staticmethod
     def create_brain(dna):
         def dna_iter(dna):
-            for i in range(0, len(dna), Animal.DNA_VALUE_LEN):
-                cur = dna[i:i+Animal.DNA_VALUE_LEN]
+            for i in range(0, len(dna), Animal.DNA_BRAIN_VALUE_LEN):
+                cur = dna[i:i+Animal.DNA_BRAIN_VALUE_LEN]
                 yield (int(cur, Animal.DNA_BASE) - Animal.DNA_HALF_MAX_VALUE) / Animal.DNA_HALF_MAX_VALUE
 
         dna = dna_iter(dna)
@@ -228,3 +271,11 @@ class Animal(object):
             if random() < Animal.MUTATE_CHANCE:
                 dna_ba[i] = ord(str(randint(0, Animal.DNA_BASE-1)))
         return str(dna_ba)
+
+    @staticmethod
+    def mix_dna(dna1, dna2):
+        m = randint(0, len(dna1))
+        if randint(0,1):
+            return Animal.mutate_dna(dna1[:m] + dna2[m:])
+        else:
+            return Animal.mutate_dna(dna2[:m] + dna1[m:])

@@ -11,6 +11,7 @@ import math
 from time import time
 
 import World
+from Animal import Gender
 
 
 class MyWindow(Window):
@@ -29,19 +30,19 @@ class MyWindow(Window):
         self.timer.Interval = TimeSpan(0, 0, 0, 0, self.timer_slider.Value)
         self.world.food_timer = self.food_slider.Value
         
-    def add_line(self, x1, y1, x2, y2):
+    def add_line(self, x1, y1, x2, y2, brush=Brushes.Gray):
         ln = Line()
         ln.X1 = x1
         ln.Y1 = y1
         ln.X2 = x2
         ln.Y2 = y2
         ln.StrokeThickness = 0.1
-        ln.Stroke = Brushes.Gray
+        ln.Stroke = brush
         self.canvas.Children.Add(ln)
         
 
 
-    def make_food_shape(self, x, y, size):
+    def make_food_shape(self):
         el = Ellipse()
         el.Fill = Brushes.Gray
         el.Height=1
@@ -50,11 +51,15 @@ class MyWindow(Window):
         return el
 
 
-    def make_animal_shape(self, x, y, size, brush):
+    def make_animal_shape(self, animal):
         canvas = Canvas()
 
         el = Ellipse()
-        el.Fill = brush
+        if animal.gender == Gender.FEMALE:
+            el.Fill = Brushes.DarkRed
+        else:
+            el.Fill = Brushes.Green
+
         el.Height=1
         el.Width=1
         el.RenderTransform = TranslateTransform(-0.5, -0.5)
@@ -90,15 +95,12 @@ class MyWindow(Window):
         self.canvas.Children.Clear()
 
         if self.chunks_checkBox.IsChecked:
-            for row in range(1, int(self.world.height / self.world.CHUNK_SIZE)+1):
-                self.add_line(0, self.world.CHUNK_SIZE * row, self.world.width, self.world.CHUNK_SIZE * row)
-
-            for col in range(1, int(self.world.width/ self.world.CHUNK_SIZE)+1):
-                self.add_line(self.world.CHUNK_SIZE * col, 0, self.world.CHUNK_SIZE * col, self.world.height)
+            self.draw_grid(self.world.FEMALE_CHUNK_SIZE, Brushes.Gray)
+            self.draw_grid(self.world.FOOD_CHUNK_SIZE, Brushes.Red)
 
         for animal in self.world.animals:
             if not hasattr(animal, 'shape'):
-                animal.shape = self.make_animal_shape(animal.x, animal.y, animal.size, Brushes.Green)
+                animal.shape = self.make_animal_shape(animal)
             tg = TransformGroup()
             tg.Children.Add(ScaleTransform(animal.size, animal.size))
             tg.Children.Add(RotateTransform(math.degrees(animal.angle)))
@@ -108,7 +110,7 @@ class MyWindow(Window):
 
         for food in self.world.food:
             if not hasattr(food, 'shape'):
-                food.shape = self.make_food_shape(food.x, food.y, food.size)
+                food.shape = self.make_food_shape()
                 
             tg = TransformGroup()
             tg.Children.Add(TranslateTransform(-0.5, -0.5))
@@ -116,6 +118,13 @@ class MyWindow(Window):
             tg.Children.Add(TranslateTransform(food.x, food.y))
             food.shape.RenderTransform = tg
             self.canvas.Children.Add(food.shape)
+
+    def draw_grid(self, size, brush):
+        for row in range(1, int(self.world.height / size)+1):
+            self.add_line(0, size * row, self.world.width, size * row, brush)
+
+        for col in range(1, int(self.world.width/ size)+1):
+            self.add_line(size * col, 0, size * col, self.world.height, brush)
                     
     def timer_slider_ValueChanged(self, sender, e):        
         self.timer.Interval = TimeSpan(0, 0, 0, 0, sender.Value)
