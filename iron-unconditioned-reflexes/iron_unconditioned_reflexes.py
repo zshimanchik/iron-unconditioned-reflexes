@@ -5,7 +5,7 @@ from System.Windows import Application, Window, Point
 from System.Windows.Threading import DispatcherTimer
 from System.Windows.Shapes import *
 from System.Windows.Controls import Grid, Canvas
-from System.Windows.Media import Brushes, ScaleTransform, TranslateTransform, RotateTransform, TransformGroup
+from System.Windows.Media import Brushes, ScaleTransform, TranslateTransform, RotateTransform, TransformGroup, RadialGradientBrush, Color
 
 import math
 from time import time
@@ -17,6 +17,7 @@ from Animal import Gender
 class MyWindow(Window):
     def __init__(self):        
         self.mouse_drag = False
+        self.renew_food_shapes_flag = True
         self.world = World.World(400, 200)
         self.mouse_start_point = Point(0, 0)
         
@@ -43,13 +44,46 @@ class MyWindow(Window):
 
 
     def make_food_shape(self):
+        canvas = Canvas()
+
         el = Ellipse()
         el.Fill = Brushes.Gray
         el.Height=1
         el.Width=1
-        #el.RenderTransform = TranslateTransform(-0.5, -0.5)
-        return el
+        el.RenderTransform = TranslateTransform(-0.5, -0.5)
+        canvas.Children.Add(el)
 
+        if self.food_smell_checkBox.IsChecked:
+            smell_el = Ellipse()
+
+            color1 = Color.FromArgb(70, 0, 220, 20)
+            color2 = Color.FromArgb(30, 200, 255, 200)
+            smell_el.Fill = RadialGradientBrush(color1, color2)
+
+            smell_el.StrokeThickness = 0.03
+            smell_el.Stroke = Brushes.Gray
+
+            smell_el.Height = World.World.SMELL_SIZE_RATIO * 2
+            smell_el.Width = World.World.SMELL_SIZE_RATIO * 2
+            smell_el.RenderTransform = TranslateTransform(-World.World.SMELL_SIZE_RATIO, -World.World.SMELL_SIZE_RATIO)
+        
+            canvas.Children.Add(smell_el)
+        
+        canvas.SetZIndex(el, 1)
+        return canvas
+
+    def make_eat_distance_shape(self, food): #xxx
+        canvas = Canvas()
+
+        eat_el =Ellipse()
+        eat_el.StrokeThickness = 0.1
+        eat_el.Stroke = Brushes.Black
+        size = World.World.EATING_DISTANCE + food.size
+        eat_el.Height = size*2
+        eat_el.Width = size*2
+        eat_el.RenderTransform = TranslateTransform(-size + food.x, -size + food.y)
+        canvas.Children.Add(eat_el)
+        return canvas
 
     def make_animal_shape(self, animal):
         canvas = Canvas()
@@ -101,6 +135,7 @@ class MyWindow(Window):
         for animal in self.world.animals:
             if not hasattr(animal, 'shape'):
                 animal.shape = self.make_animal_shape(animal)
+                self.canvas.SetZIndex(animal.shape, 2)
             tg = TransformGroup()
             tg.Children.Add(ScaleTransform(animal.size, animal.size))
             tg.Children.Add(RotateTransform(math.degrees(animal.angle)))
@@ -109,15 +144,20 @@ class MyWindow(Window):
             self.canvas.Children.Add(animal.shape)
 
         for food in self.world.food:
-            if not hasattr(food, 'shape'):
+            if self.renew_food_shapes_flag or not hasattr(food, 'shape'):
                 food.shape = self.make_food_shape()
                 
             tg = TransformGroup()
-            tg.Children.Add(TranslateTransform(-0.5, -0.5))
             tg.Children.Add(ScaleTransform(food.size, food.size))
             tg.Children.Add(TranslateTransform(food.x, food.y))
             food.shape.RenderTransform = tg
             self.canvas.Children.Add(food.shape)
+
+            if self.eat_distance_checkBox.IsChecked:
+                eat_shape = self.make_eat_distance_shape(food) #xxx
+                self.canvas.Children.Add(eat_shape)
+
+        self.renew_food_shapes_flag = False
 
     def draw_grid(self, size, brush):
         for row in range(1, int(self.world.height / size)+1):
@@ -165,9 +205,9 @@ class MyWindow(Window):
     
     def food_slider_ValueChanged(self, sender, e):
         self.world.food_timer = int(sender.Value)
-        
-
-        
+    
+    def renew_food_shapes(self, sender, e):
+        self.renew_food_shapes_flag = True
 
 
 if __name__ == '__main__':

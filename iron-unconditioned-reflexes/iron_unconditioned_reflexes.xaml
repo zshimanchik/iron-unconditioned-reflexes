@@ -15,6 +15,8 @@
                 <TextBlock Text="{Binding Path=Value, ElementName=food_slider, StringFormat=Food: {0:#}}" HorizontalAlignment="Left" Margin="0,55,0,0" VerticalAlignment="Top"/>
                 <TextBlock x:Name="label4" Text="Label" HorizontalAlignment="Left" Margin="0,129,0,0" VerticalAlignment="Top"/>
                 <CheckBox x:Name="chunks_checkBox" Content="draw chunks" HorizontalAlignment="Left" Margin="207,80,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="food_smell_checkBox" Content="food smell" HorizontalAlignment="Left" Margin="208,100,0,0" VerticalAlignment="Top" Checked="renew_food_shapes" Unchecked="renew_food_shapes"/>
+                <CheckBox x:Name="eat_distance_checkBox" Content="eat distance" HorizontalAlignment="Left" Margin="208,121,0,0" VerticalAlignment="Top" Checked="renew_food_shapes" Unchecked="renew_food_shapes"/>
 
             </Grid>
             <Canvas x:Name="parent_canvas" DockPanel.Dock="Left">
