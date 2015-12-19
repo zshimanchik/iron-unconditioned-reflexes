@@ -49,15 +49,17 @@ class Animal(object):
 
     # neural_network shape
     SENSOR_COUNT = 7
+    SENSOR_DIMENSION = 2 # how many values in one sensor
+    INPUT_LAYER_SIZE = SENSOR_COUNT * SENSOR_DIMENSION
     MIDDLE_LAYER_NEURONS = 2
-    OUTPUT_SIZE = 2
+    OUTPUT_SIZE = 3
 
     # DNA
     DNA_BASE = 4 # must be less or equals than 10, but greater than 1
     DNA_BRAIN_VALUE_LEN = 5
     DNA_MAX_VALUE = DNA_BASE ** DNA_BRAIN_VALUE_LEN
     DNA_HALF_MAX_VALUE = int(DNA_MAX_VALUE / 2)
-    DNA_FOR_BRAIN_LEN = (MIDDLE_LAYER_NEURONS*(SENSOR_COUNT + 1) + OUTPUT_SIZE*(MIDDLE_LAYER_NEURONS + 1)) * DNA_BRAIN_VALUE_LEN
+    DNA_FOR_BRAIN_LEN = (MIDDLE_LAYER_NEURONS*(INPUT_LAYER_SIZE + 1) + OUTPUT_SIZE*(MIDDLE_LAYER_NEURONS + 1)) * DNA_BRAIN_VALUE_LEN
     DNA_LEN = 1 + DNA_FOR_BRAIN_LEN
 
     # sensor_count_in_head / sensor_count
@@ -76,6 +78,7 @@ class Animal(object):
     MUTATE_CHANCE = 0.05
 
     SIZE = 10
+    MAX_SMELL_SIZE = 50
 
     def __init__(self, world, dna=""):
         self.world = world
@@ -84,6 +87,7 @@ class Animal(object):
         self._y = randint(0, self.world.height)
         self.size = Animal.SIZE
         self.angle = 0
+        self.smell_size = 0
 
         self._sensor_count_in_head = int(self.SENSOR_COUNT * Animal.SENSOR_COUNT_IN_HEAD_RATIO)
         self._sensor_count_not_in_head = self.SENSOR_COUNT - self._sensor_count_in_head
@@ -148,6 +152,7 @@ class Animal(object):
                 finally:
                     female.lock.release()
 
+        self.smell_size = (max(-1, answer[2]) + 1) / 2.0 * Animal.MAX_SMELL_SIZE
         self.move(answer[0], answer[1])
 
     def request_for_sex(self, male):

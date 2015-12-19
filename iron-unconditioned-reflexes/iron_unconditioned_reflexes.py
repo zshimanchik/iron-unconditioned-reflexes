@@ -56,8 +56,8 @@ class MyWindow(Window):
         if self.food_smell_checkBox.IsChecked:
             smell_el = Ellipse()
 
-            color1 = Color.FromArgb(70, 0, 220, 20)
-            color2 = Color.FromArgb(30, 200, 255, 200)
+            color1 = Color.FromArgb(40, 0, 220, 20)
+            color2 = Color.FromArgb(0, 0, 220, 20)
             smell_el.Fill = RadialGradientBrush(color1, color2)
 
             smell_el.StrokeThickness = 0.03
@@ -72,7 +72,7 @@ class MyWindow(Window):
         canvas.SetZIndex(el, 1)
         return canvas
 
-    def make_eat_distance_shape(self, food): #xxx
+    def make_eat_distance_shape(self, food):
         canvas = Canvas()
 
         eat_el =Ellipse()
@@ -83,6 +83,24 @@ class MyWindow(Window):
         eat_el.Width = size*2
         eat_el.RenderTransform = TranslateTransform(-size + food.x, -size + food.y)
         canvas.Children.Add(eat_el)
+        return canvas
+
+    def make_smell_shape(self, animal):
+        canvas = Canvas()
+        smell_el = Ellipse()
+
+        color1 = Color.FromArgb(40, 220, 0, 20)
+        color2 = Color.FromArgb(0, 220, 0, 20)
+        smell_el.Fill = RadialGradientBrush(color1, color2)
+
+        smell_el.StrokeThickness = 0.1
+        smell_el.Stroke = Brushes.Gray
+
+        smell_el.Height = animal.smell_size * 2
+        smell_el.Width = animal.smell_size * 2
+        smell_el.RenderTransform = TranslateTransform(-animal.smell_size, -animal.smell_size)
+
+        canvas.Children.Add(smell_el)
         return canvas
 
     def make_animal_shape(self, animal):
@@ -113,8 +131,7 @@ class MyWindow(Window):
         
         return canvas
 
-
-    def dispatcherTimer_Tick(self, sender, e):        
+    def dispatcherTimer_Tick(self, sender, e):
         if (self.world.time % 10 == 0):
             performance = (time() - self.start_time) / 10.0
             self.label1.Text = "performance={}".format(performance)
@@ -130,7 +147,7 @@ class MyWindow(Window):
 
         if self.chunks_checkBox.IsChecked:
             self.draw_grid(self.world.FEMALE_CHUNK_SIZE, Brushes.Gray)
-            self.draw_grid(self.world.FOOD_CHUNK_SIZE, Brushes.Red)
+            self.draw_grid(self.world.FOOD_SMELL_CHUNK_SIZE, Brushes.Red)
 
         for animal in self.world.animals:
             if not hasattr(animal, 'shape'):
@@ -142,6 +159,11 @@ class MyWindow(Window):
             tg.Children.Add(TranslateTransform(animal.x, animal.y))
             animal.shape.RenderTransform = tg            
             self.canvas.Children.Add(animal.shape)
+
+            if self.animal_smell_checkBox.IsChecked:
+                smell_el = self.make_smell_shape(animal)
+                smell_el.RenderTransform = TranslateTransform(animal.x, animal.y)
+                self.canvas.Children.Add(smell_el)
 
         for food in self.world.food:
             if self.renew_food_shapes_flag or not hasattr(food, 'shape'):
