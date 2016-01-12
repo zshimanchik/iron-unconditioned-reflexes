@@ -4,6 +4,9 @@
        Title="iron-unconditioned-reflexes" Height="245.091" Width="767.221">
     <Grid x:Name="grid" Margin="0,0,0,0">
         <DockPanel x:Name="dock_panel" LastChildFill="True">
+            <Menu x:Name="menu" DockPanel.Dock="Top" Panel.ZIndex="1" >
+                <MenuItem Header="Animal window" Click="MenuItem_Click" />
+            </Menu>
             <Grid DockPanel.Dock="Right" Width="300"  Background="#FFDEF9DC" Panel.ZIndex="1">
                 <Slider x:Name="timer_slider" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="203" Interval="1" Maximum="300" ValueChanged="timer_slider_ValueChanged" SmallChange="5" LargeChange="30" Margin="94,0,0,0"/>
                 <Slider x:Name="scale_slider" HorizontalAlignment="Left" Height="26" Margin="94,26,0,0" VerticalAlignment="Top" Width="203" Interval="1" Maximum="3" Minimum="0.3" ValueChanged="scale_slider_ValueChanged" Value="1" SelectionEnd="1" SelectionStart="1"/>
@@ -20,8 +23,9 @@
                 <CheckBox x:Name="animal_smell_checkBox" Content="animal smell" HorizontalAlignment="Left" Margin="208,141,0,0" VerticalAlignment="Top"/>
 
             </Grid>
-            <Canvas x:Name="parent_canvas" DockPanel.Dock="Left">
-                <Canvas x:Name="canvas" SizeChanged="canvas_SizeChanged" Background="#FFD8D8D8" MouseMove="canvas_MouseMove" MouseWheel="canvas_MouseWheel" Width="{Binding ActualWidth, ElementName=parent_canvas, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=parent_canvas, Mode=OneWay}" MouseLeave="canvas_MouseLeave" MouseRightButtonDown="canvas_MouseRightButtonDown" MouseRightButtonUp="canvas_MouseRightButtonUp">
+            <Canvas
+                x:Name="parent_canvas" DockPanel.Dock="Left">
+                <Canvas x:Name="canvas" SizeChanged="canvas_SizeChanged" Background="#FFD8D8D8" MouseMove="canvas_MouseMove" MouseWheel="canvas_MouseWheel" Width="{Binding ActualWidth, ElementName=parent_canvas, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=parent_canvas, Mode=OneWay}" MouseLeave="canvas_MouseLeave" MouseRightButtonDown="canvas_MouseRightButtonDown" MouseRightButtonUp="canvas_MouseRightButtonUp" MouseLeftButtonDown="canvas_MouseLeftButtonDown">
                     <Canvas RenderTransformOrigin="0,0" Height="1" Width="1">
                         <Ellipse Fill="Yellow" Height="1" Width="1" >
                             <Ellipse.RenderTransform>
@@ -46,8 +50,5 @@
                 </Canvas>
             </Canvas>
         </DockPanel>
-
-
-
     </Grid>
 </Window> 

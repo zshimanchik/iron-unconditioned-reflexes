@@ -28,6 +28,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Animal.py" />
+    <Compile Include="animal_window.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="BrainTrainer.py" />
     <Compile Include="iron_unconditioned_reflexes.py" />
     <Compile Include="NeuralNetwork\Layer.py" />
@@ -37,6 +40,9 @@
     <Compile Include="World.py" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="animal_window.xaml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="iron_unconditioned_reflexes.xaml">
       <SubType>Designer</SubType>
     </Content>

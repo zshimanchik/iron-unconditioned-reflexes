@@ -12,12 +12,14 @@ from time import time
 
 import World
 from Animal import Gender
+from animal_window import AnimalWindow
 
 
 class MyWindow(Window):
     def __init__(self):        
         self.mouse_drag = False
         self.renew_food_shapes_flag = True
+        self.renew_animal_shapes_flag = True
         self.world = World.World(400, 200)
         self.mouse_start_point = Point(0, 0)
         
@@ -30,6 +32,9 @@ class MyWindow(Window):
         self.window = wpf.LoadComponent(self, 'iron_unconditioned_reflexes.xaml') 
         self.timer.Interval = TimeSpan(0, 0, 0, 0, self.timer_slider.Value)
         self.world.food_timer = self.food_slider.Value
+
+        self.animal_window = None
+        self.selected_animal = None
         
     def add_line(self, x1, y1, x2, y2, brush=Brushes.Gray):
         ln = Line()
@@ -107,7 +112,9 @@ class MyWindow(Window):
         canvas = Canvas()
 
         el = Ellipse()
-        if animal.gender == Gender.FEMALE:
+        if animal == self.selected_animal:
+            el.Fill = Brushes.Gold
+        elif animal.gender == Gender.FEMALE:
             el.Fill = Brushes.DarkRed
         else:
             el.Fill = Brushes.Green
@@ -150,7 +157,7 @@ class MyWindow(Window):
             self.draw_grid(self.world.FOOD_SMELL_CHUNK_SIZE, Brushes.Red)
 
         for animal in self.world.animals:
-            if not hasattr(animal, 'shape'):
+            if self.renew_animal_shapes_flag or not hasattr(animal, 'shape'):
                 animal.shape = self.make_animal_shape(animal)
                 self.canvas.SetZIndex(animal.shape, 2)
             tg = TransformGroup()
@@ -165,6 +172,8 @@ class MyWindow(Window):
                 smell_el.RenderTransform = TranslateTransform(animal.x, animal.y)
                 self.canvas.Children.Add(smell_el)
 
+        self.renew_animal_shapes_flag = False
+
         for food in self.world.food:
             if self.renew_food_shapes_flag or not hasattr(food, 'shape'):
                 food.shape = self.make_food_shape()
@@ -178,7 +187,7 @@ class MyWindow(Window):
             if self.eat_distance_checkBox.IsChecked:
                 eat_shape = self.make_eat_distance_shape(food) #xxx
                 self.canvas.Children.Add(eat_shape)
-
+                
         self.renew_food_shapes_flag = False
 
     def draw_grid(self, size, brush):
@@ -197,8 +206,8 @@ class MyWindow(Window):
             self.canvas.RenderTransform = ScaleTransform(sender.Value, sender.Value)
         
     def canvas_SizeChanged(self, sender, e):
-        self.world.width = sender.ActualWidth
-        self.world.height= sender.ActualHeight
+        self.world.width = int(sender.ActualWidth)
+        self.world.height= int(sender.ActualHeight)
         
     def canvas_MouseRightButtonDown(self, sender, e):
         self.mouse_drag = True   
@@ -230,6 +239,19 @@ class MyWindow(Window):
     
     def renew_food_shapes(self, sender, e):
         self.renew_food_shapes_flag = True
+    
+    def MenuItem_Click(self, sender, e):
+        if self.animal_window is None or not self.animal_window.IsLoaded:
+            self.animal_window = AnimalWindow()            
+            self.animal_window.animal = self.selected_animal
+            self.animal_window.Show()
+    
+    def canvas_MouseLeftButtonDown(self, sender, e):
+        point = e.GetPosition(self.canvas)
+        self.selected_animal = self.world.get_animal(point.X, point.Y)
+        if self.animal_window:
+            self.animal_window.animal = self.selected_animal
+        self.renew_animal_shapes_flag = True
 
 
 if __name__ == '__main__':

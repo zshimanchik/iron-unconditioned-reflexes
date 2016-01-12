@@ -182,6 +182,16 @@ class World(object):
     def add_animal(self, animal):
         self.animals_to_add.append(animal)
 
+    def get_animal(self, x, y):
+        closest_animal = None
+        closest_dist = Animal.SIZE + 10
+        for animal  in self.animals:
+            dist = distance(x, y, animal.x, animal.y)
+            if dist < closest_dist:
+                closest_animal = animal
+                closest_dist = dist
+        return closest_animal
+
     def _make_empty_chunks(self, chunk_size):
         return [
             [[] for _ in range(int(self.width / chunk_size) + 1)]
