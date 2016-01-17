@@ -167,10 +167,10 @@ class Animal(object):
         # if it tries to birth more child than it can - bud so many as it can and die.
         if child_count*Animal.ENERGY_FOR_BUD > mother.energy:
             child_count = int(mother.energy / Animal.ENERGY_FOR_BUD)
-            self.energy = 0
+            mother.energy = 0
         if child_count*Animal.ENERGY_FOR_BUD > father.energy:
             child_count = int(father.energy / Animal.ENERGY_FOR_BUD)
-            self.energy = 0
+            father.energy = 0
 
         print("{}\n{}\n{}".format("="*10, mother.dna, father.dna))
         for _ in range(child_count):
