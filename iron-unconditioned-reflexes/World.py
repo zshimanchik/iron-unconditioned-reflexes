@@ -38,7 +38,7 @@ class World(object):
         self.height = height
 
         self.restart()
-        self.food_timer = 80
+        self._food_timer = 80
 
         self.queue = Queue()
         self.threads = []
@@ -47,6 +47,14 @@ class World(object):
             t.daemon = True
             t.start()
             self.threads.append(t)
+
+    @property
+    def food_timer(self):
+        return int(self._food_timer * (200 * 500) / (self.width * self.height))
+
+    @food_timer.setter
+    def food_timer(self, value):
+        self._food_timer = int(value * (self.width * self.height) / (200 * 500))
  
 
     def restart(self):
@@ -87,7 +95,7 @@ class World(object):
         self._clear_empty_food()
 
         # add some food some fixed time
-        if self.time % self.food_timer == 0:
+        if self.time % self._food_timer == 0:
             for _ in range(World.APPEAR_FOOD_COUNT):
                 self.food.append(Food(randint(0, self.width), randint(0, self.height), randint(World.APPEAR_FOOD_SIZE_MIN, World.APPEAR_FOOD_SIZE_MAX)))
                 

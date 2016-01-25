@@ -20,7 +20,7 @@ class MyWindow(Window):
         self.mouse_drag = False
         self.renew_food_shapes_flag = True
         self.renew_animal_shapes_flag = True
-        self.world = World.World(400, 200)
+        self.world = World.World(500, 200)
         self.mouse_start_point = Point(0, 0)
         
         self.timer= DispatcherTimer()        
@@ -144,7 +144,7 @@ class MyWindow(Window):
             self.label1.Text = "performance={}".format(performance)
             self.start_time = time()
 
-        self.label.Text = "world time={}".format(self.world.time)
+        self.label.Text = "world time={} w={} h={}".format(self.world.time, self.world.width, self.world.height)
         self.label4.Text = "animal count={}\nfood count={}".format(len(self.world.animals), len(self.world.food))        
         self.world.update()
         self.draw()
