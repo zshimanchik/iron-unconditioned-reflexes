@@ -1,8 +1,8 @@
-﻿from math import sqrt
+﻿from Queue import Queue
+from math import sqrt
+from random import randint
 from threading import Thread
-from Queue import Queue
 
-from random import randint, random
 from Animal import Animal, Food, Gender
 
 
@@ -28,11 +28,13 @@ class World(object):
     APPEAR_FOOD_SIZE_MAX = 10
 
     SEX_DISTANCE = 20
-    
+    SMELL_DIMENSIONS = 3
+
     FOOD_SMELL_CHUNK_SIZE = max(APPEAR_FOOD_SIZE_MAX * SMELL_SIZE_RATIO + Animal.SIZE, EATING_DISTANCE)
     FEMALE_CHUNK_SIZE = SEX_DISTANCE + Animal.SIZE * 2
     ANIMAL_SMELL_CHUNK_SIZE = Animal.MAX_SMELL_SIZE
-    
+    SMELL_CHUNK_SIZE = max(FOOD_SMELL_CHUNK_SIZE, ANIMAL_SMELL_CHUNK_SIZE)
+
     def __init__(self, width, height):
         self.width = width
         self.height = height
@@ -68,12 +70,16 @@ class World(object):
         self.food_smell_chunks = self._make_empty_chunks(self.FOOD_SMELL_CHUNK_SIZE)
         self.female_chunks = self._make_empty_chunks(self.FEMALE_CHUNK_SIZE)
         self.animal_smell_chunks = self._make_empty_chunks(self.ANIMAL_SMELL_CHUNK_SIZE)
+        self.smell_chunks = self._make_empty_chunks(self.SMELL_CHUNK_SIZE)
 
         for food in self.food:
             self.check_in_bounds(food)
             # food smell chunks
             chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.FOOD_SMELL_CHUNK_SIZE)
             self.food_smell_chunks[chunk_row][chunk_col].append(food)
+            # smell chunks
+            chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.SMELL_CHUNK_SIZE)
+            self.smell_chunks[chunk_row][chunk_col].append(food)
 
         for animal in self.animals:
             self.check_in_bounds(animal)
@@ -84,6 +90,9 @@ class World(object):
             # smell chunks
             chunk_row, chunk_col = self.get_chunk_index(animal.x, animal.y, self.ANIMAL_SMELL_CHUNK_SIZE)
             self.animal_smell_chunks[chunk_row][chunk_col].append(animal)
+            # general smell chunks
+            chunk_row, chunk_col = self.get_chunk_index(animal.x, animal.y, self.SMELL_CHUNK_SIZE)
+            self.smell_chunks[chunk_row][chunk_col].append(animal)
 
         for animal in self.animals:
             self.queue.put(animal)
@@ -115,18 +124,17 @@ class World(object):
             queue.task_done()
 
     def get_sensor_value(self, pos):
-        max_food_smell = 0
-        for food in self.adjacent_food(*pos):
-            if food.smell_size > 0:
-                try:
-                    max_food_smell = max(max_food_smell, 1.0 - distance(food.x, food.y, pos[0], pos[1]) / food.smell_size)
-                except ZeroDivisionError:
-                    pass
-        max_animal_smell = 0
-        for animal in self.adjacent_animals(*pos):
-            if animal.smell_size > 0:
-                max_animal_smell = max(max_animal_smell, 1.0 - distance(animal.x, animal.y, pos[0], pos[1]) / animal.smell_size)
-        return max_food_smell, max_animal_smell
+        res = [0] * World.SMELL_DIMENSIONS
+        for smeller in self.adjacent_smells(*pos):
+            try:
+                smell_strength = 1.0 - distance(smeller.x, smeller.y, pos[0], pos[1]) / smeller.smell_size
+                for i, v in enumerate(smeller.smell):
+                    val = v * smell_strength
+                    if val > res[i]:
+                        res[i] = val
+            except ZeroDivisionError:
+                pass
+        return res
 
     def get_closest_food(self, x, y, max_distance):
         min_dist = 10000
@@ -164,6 +172,9 @@ class World(object):
 
     def adjacent_animals(self, x, y):
         return self._adjacent_elements(self.animal_smell_chunks, self.ANIMAL_SMELL_CHUNK_SIZE, x, y)
+
+    def adjacent_smells(self, x, y):
+        return self._adjacent_elements(self.smell_chunks, self.SMELL_CHUNK_SIZE, x, y)
 
     def adjacent_chunks(self, chunks, row, col):
          r, c = row - 1, col -1

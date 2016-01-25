@@ -4,7 +4,6 @@ from random import random, randint
 from threading import Lock
 
 from NeuralNetwork.NeuralNetwork import NeuralNetwork
-from NeuralNetwork.Neuron import Neuron
 import World
 
 TWO_PI = math.pi * 2
@@ -15,6 +14,7 @@ class Food(object):
         self.x = x
         self.y = y
         self._size = size
+        self._smell = (0, 1, 0,)
         self._smell_size = self._size * World.World.SMELL_SIZE_RATIO
         #self.lock = Lock()
 
@@ -38,9 +38,15 @@ class Food(object):
     def smell_size(self):
         return self._smell_size
 
+    @property
+    def smell(self):
+        return self._smell
+
+
 class Gender:
     FEMALE = 0
     MALE = 1
+
 
 class Animal(object):
     MAX_ENERGY = 30
@@ -49,7 +55,7 @@ class Animal(object):
 
     # neural_network shape
     SENSOR_COUNT = 7
-    SENSOR_DIMENSION = 2 # how many values in one sensor
+    SENSOR_DIMENSION = 3  # how many values in one sensor
     INPUT_LAYER_SIZE = SENSOR_COUNT * SENSOR_DIMENSION
     MIDDLE_LAYER_SIZE = 2
     OUTPUT_LAYER_SIZE = 3
@@ -87,6 +93,7 @@ class Animal(object):
         self._y = randint(0, self.world.height)
         self.size = Animal.SIZE
         self.angle = 0
+        self._smell = (0.0, 0.0, 1.0, )
         self.smell_size = 0
 
         self._sensor_count_in_head = int(self.SENSOR_COUNT * Animal.SENSOR_COUNT_IN_HEAD_RATIO)
@@ -231,6 +238,10 @@ class Animal(object):
     def y(self, value):
         self._y = value
         self._sensors_positions_calculated = False
+
+    @property
+    def smell(self):
+        return self._smell
 
     @property
     def dna(self):
