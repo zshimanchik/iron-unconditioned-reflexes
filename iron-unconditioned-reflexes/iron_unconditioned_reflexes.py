@@ -148,6 +148,8 @@ class MyWindow(Window):
         self.label4.Text = "animal count={}\nfood count={}".format(len(self.world.animals), len(self.world.food))        
         self.world.update()
         self.draw()
+        if self.animal_window:
+            self.animal_window.draw_animal_brain()
 
     def draw(self):
         self.canvas.Children.Clear()

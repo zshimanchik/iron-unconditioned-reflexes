@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="AnimalWindow" Height="330" Width="482.727">
     <Grid>
-        <Canvas x:Name="canvas" HorizontalAlignment="Left" Height="300" VerticalAlignment="Top" Width="306"/>
+        <Canvas x:Name="canvas" Margin="0,0,169,0" Background="Gainsboro"/>
 
     </Grid>
 </Window>
