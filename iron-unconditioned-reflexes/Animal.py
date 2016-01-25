@@ -51,15 +51,15 @@ class Animal(object):
     SENSOR_COUNT = 7
     SENSOR_DIMENSION = 2 # how many values in one sensor
     INPUT_LAYER_SIZE = SENSOR_COUNT * SENSOR_DIMENSION
-    MIDDLE_LAYER_NEURONS = 2
-    OUTPUT_SIZE = 3
+    MIDDLE_LAYER_SIZE = 2
+    OUTPUT_LAYER_SIZE = 3
 
     # DNA
     DNA_BASE = 4 # must be less or equals than 10, but greater than 1
     DNA_BRAIN_VALUE_LEN = 5
     DNA_MAX_VALUE = DNA_BASE ** DNA_BRAIN_VALUE_LEN
     DNA_HALF_MAX_VALUE = int(DNA_MAX_VALUE / 2)
-    DNA_FOR_BRAIN_LEN = (MIDDLE_LAYER_NEURONS*(INPUT_LAYER_SIZE + 1) + OUTPUT_SIZE*(MIDDLE_LAYER_NEURONS + 1)) * DNA_BRAIN_VALUE_LEN
+    DNA_FOR_BRAIN_LEN = (MIDDLE_LAYER_SIZE * (INPUT_LAYER_SIZE + 1) + OUTPUT_LAYER_SIZE * (MIDDLE_LAYER_SIZE + 1)) * DNA_BRAIN_VALUE_LEN
     DNA_LEN = 1 + DNA_FOR_BRAIN_LEN
 
     # sensor_count_in_head / sensor_count
@@ -245,7 +245,7 @@ class Animal(object):
                 yield (int(cur, Animal.DNA_BASE) - Animal.DNA_HALF_MAX_VALUE) / Animal.DNA_HALF_MAX_VALUE
 
         dna = dna_iter(dna)
-        brain = NeuralNetwork([Animal.SENSOR_COUNT, Animal.MIDDLE_LAYER_NEURONS, Animal.OUTPUT_SIZE])
+        brain = NeuralNetwork([Animal.INPUT_LAYER_SIZE, Animal.MIDDLE_LAYER_SIZE, Animal.OUTPUT_LAYER_SIZE])
         for layer in brain:
             for neuron in layer:
                 neuron.w = [dna.next() for _ in range(len(neuron.w))]
