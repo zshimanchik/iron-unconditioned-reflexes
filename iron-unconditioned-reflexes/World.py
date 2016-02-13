@@ -126,7 +126,7 @@ class World(object):
         res = [0] * Animal.SENSOR_DIMENSION
         for smeller in self.adjacent_smells(*pos):
             try:
-                smell_strength = 1.0 - distance(smeller.x, smeller.y, pos[0], pos[1]) / smeller.smell_size
+                smell_strength = max(0, (1.0 - distance(smeller.x, smeller.y, pos[0], pos[1]) / smeller.smell_size)) ** 2
                 for i, v in enumerate(smeller.smell):
                     val = v * smell_strength
                     if val > res[i]:
