@@ -68,12 +68,6 @@ class Animal(object):
     DNA_FOR_BRAIN_LEN = (MIDDLE_LAYER_SIZE * (INPUT_LAYER_SIZE + 1) + OUTPUT_LAYER_SIZE * (MIDDLE_LAYER_SIZE + 1)) * DNA_BRAIN_VALUE_LEN
     DNA_LEN = 1 + DNA_FOR_BRAIN_LEN
 
-    # sensor_count_in_head / sensor_count
-    SENSOR_COUNT_IN_HEAD_RATIO = 0.5
-    # head angle
-    HEAD_ANGLE = math.pi / 4.0
-    HALF_HEAD_ANGLE = HEAD_ANGLE / 2.0
-
     READINESS_TO_BUD_THREADSHOULD = 30
     READINESS_TO_BUD_INCREASEMENT = 0.2
     ENERGY_FULLNES_TO_BUD = 0.7
@@ -96,8 +90,6 @@ class Animal(object):
         self._smell = (0.0, 0.0, 1.0, )
         self.smell_size = 0
 
-        self._sensor_count_in_head = int(self.SENSOR_COUNT * Animal.SENSOR_COUNT_IN_HEAD_RATIO)
-        self._sensor_count_not_in_head = self.SENSOR_COUNT - self._sensor_count_in_head
         self.sensor_values = []
         self._sensors_positions = []
         self._sensors_positions_calculated = False
@@ -116,30 +108,20 @@ class Animal(object):
         
     @property
     def sensors_positions(self):
-        # on 45 degrees (pi/4) of main angle located 75% of all sensors
         if not self._sensors_positions_calculated:
-            self._sensors_positions = []
-
-            # calc sensor positions in head
-
-
-            delta_angle = Animal.HEAD_ANGLE / (self._sensor_count_in_head-1)
-            angle = -Animal.HALF_HEAD_ANGLE + self.angle
-            for _ in range(self._sensor_count_in_head):
-                self._sensors_positions.append(
-                    (math.cos(angle) * self.size + self._x, math.sin(angle) * self.size + self._y))
-                angle += delta_angle
-
-            # calc sensor positions in body
-            delta_angle = (TWO_PI - Animal.HEAD_ANGLE) / (self._sensor_count_not_in_head+1)
-            angle = Animal.HALF_HEAD_ANGLE + self.angle
-            for _ in range(self._sensor_count_not_in_head):
-                angle += delta_angle
-                self._sensors_positions.append(
-                    (math.cos(angle) * self.size + self._x, math.sin(angle) * self.size + self._y))
-
+            self._calculate_sensor_positions()
             self._sensors_positions_calculated = True
         return self._sensors_positions
+
+    def _calculate_sensor_positions(self):
+        self._sensors_positions = []
+        angle_between_sensors = TWO_PI / self.SENSOR_COUNT
+        sensor_angle = self.angle
+        for i in range(self.SENSOR_COUNT):
+            x = math.cos(sensor_angle) * self.size + self._x
+            y = math.sin(sensor_angle) * self.size + self._y
+            self._sensors_positions.append((x, y))
+            sensor_angle += angle_between_sensors
 
     def update(self):
         answer = self.brain.calculate(self.sensor_values)
