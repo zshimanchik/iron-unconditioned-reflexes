@@ -16,13 +16,13 @@ class Food(object):
         self._size = size
         self._smell = (0, 1, 0,)
         self._smell_size = self._size * World.World.SMELL_SIZE_RATIO
-        #self.lock = Lock()
+        # self.lock = Lock()
 
     def beating(self, value):
-        #self.lock.acquire()
+        # self.lock.acquire()
         real_value = min(self.size, value)
         self.size -= real_value
-        #self.lock.release()
+        # self.lock.release()
         return value
 
     @property
@@ -61,16 +61,16 @@ class Animal(object):
     OUTPUT_LAYER_SIZE = 3
 
     # DNA
-    DNA_BASE = 4 # must be less or equals than 10, but greater than 1
+    DNA_BASE = 4  # must be less or equals than 10, but greater than 1
     DNA_BRAIN_VALUE_LEN = 5
     DNA_MAX_VALUE = DNA_BASE ** DNA_BRAIN_VALUE_LEN
     DNA_HALF_MAX_VALUE = int(DNA_MAX_VALUE / 2)
     DNA_FOR_BRAIN_LEN = (MIDDLE_LAYER_SIZE * (INPUT_LAYER_SIZE + 1) + OUTPUT_LAYER_SIZE * (MIDDLE_LAYER_SIZE + 1)) * DNA_BRAIN_VALUE_LEN
     DNA_LEN = 1 + DNA_FOR_BRAIN_LEN
 
-    READINESS_TO_BUD_THREADSHOULD = 30
-    READINESS_TO_BUD_INCREASEMENT = 0.2
-    ENERGY_FULLNES_TO_BUD = 0.7
+    READINESS_TO_SEX_THRESHOLD = 30
+    READINESS_TO_SEX_INCREMENT = 0.2
+    ENERGY_FULLNESS_TO_INCREASE_READINESS_TO_SEX = 0.7
     ENERGY_FOR_BUD = 5
     MIN_CHILD_COUNT = 1
     MAX_CHILD_COUNT = 3
@@ -95,12 +95,13 @@ class Animal(object):
         self._sensors_positions_calculated = False
 
         self.energy = self.ENERGY_FOR_BUD
-        self.readiness_to_bud = 0
+        self.readiness_to_sex = 0
         self.close_females = []
         self.lock = Lock()
+        self.answer = []
 
         if not self._dna:
-            self._dna = "".join([ str(randint(0,Animal.DNA_BASE-1)) for _ in range(Animal.DNA_LEN) ])
+            self._dna = "".join([ str(randint(0, Animal.DNA_BASE-1)) for _ in range(Animal.DNA_LEN) ])
             print(self._dna)
 
         self.gender = int(self._dna[0], base=4) % 2
@@ -124,71 +125,70 @@ class Animal(object):
             sensor_angle += angle_between_sensors
 
     def update(self):
-        answer = self.brain.calculate(self.sensor_values)
-        self.answer = answer
+        self.answer = self.brain.calculate(self.sensor_values)
 
         self.energy -= Animal.ENERGY_FOR_EXIST
 
-        if self.energy / Animal.MAX_ENERGY > Animal.ENERGY_FULLNES_TO_BUD:
-            self.readiness_to_bud += Animal.READINESS_TO_BUD_INCREASEMENT
+        if self.energy_fullness > Animal.ENERGY_FULLNESS_TO_INCREASE_READINESS_TO_SEX:
+            self.readiness_to_sex += Animal.READINESS_TO_SEX_INCREMENT
 
-        if self.gender == Gender.MALE and self.readiness_to_bud >= Animal.READINESS_TO_BUD_THREADSHOULD:
-            for female in self.close_females:
-                female.lock.acquire()
-                try:
-                    if female.request_for_sex(self):
-                        break
-                finally:
-                    female.lock.release()
+        if self.can_request_for_sex():
+            self._search_partner_and_try_to_sex()
 
-        self.smell_size = (max(-1, answer[2]) + 1) / 2.0 * Animal.MAX_SMELL_SIZE
-        self.move(answer[0], answer[1])
+        self.smell_size = (max(-1, self.answer[2]) + 1) / 2.0 * Animal.MAX_SMELL_SIZE
+        self.move(self.answer[0], self.answer[1])
 
-    def request_for_sex(self, male):
-        if self.readiness_to_bud >= Animal.READINESS_TO_BUD_THREADSHOULD:
+    def can_request_for_sex(self):
+        return self.gender == Gender.MALE and self.is_ready_do_sex()
+
+    def is_ready_do_sex(self):
+        return self.readiness_to_sex >= Animal.READINESS_TO_SEX_THRESHOLD
+
+    def _search_partner_and_try_to_sex(self):
+        for female in self.close_females:
+            success = self._thread_safe_request_for_sex(female)
+            if success:
+                break
+
+    def _thread_safe_request_for_sex(self, female):
+        with female.lock:
+            success = female.be_requested_for_sex(self)
+        return success
+
+    def be_requested_for_sex(self, male):
+        if self.is_ready_do_sex():
             self.sex(male)
             return True
         return False
 
-    def sex(self, father):
-        mother = self
+    def sex(mother, father):
         child_count = randint(Animal.MIN_CHILD_COUNT, Animal.MAX_CHILD_COUNT)
         # if it tries to birth more child than it can - bud so many as it can and die.
-        if child_count*Animal.ENERGY_FOR_BUD > mother.energy:
+        if not mother.can_make_n_children(child_count):
             child_count = int(mother.energy / Animal.ENERGY_FOR_BUD)
             mother.energy = 0
-        if child_count*Animal.ENERGY_FOR_BUD > father.energy:
+        if not father.can_make_n_children(child_count):
             child_count = int(father.energy / Animal.ENERGY_FOR_BUD)
             father.energy = 0
 
         print("{}\n{}\n{}".format("="*10, mother.dna, father.dna))
         for _ in range(child_count):
-            mother.energy -= Animal.ENERGY_FOR_BUD
-            father.energy -= Animal.ENERGY_FOR_BUD
-            child = Animal(self.world, Animal.mix_dna(mother.dna, father.dna))
-            print(child.dna)
-            child.x = mother.x + randint(-30, 30)
-            child.y = mother.y + randint(-30, 30)
-            self.world.add_animal(child)
+            mother.make_child(father)
 
-        mother.readiness_to_bud = 0
+        mother.readiness_to_sex = 0
         father.readiness_to_bud = 0
 
-    def bud(self):
-        child_count = randint(Animal.MIN_CHILD_COUNT, Animal.MAX_CHILD_COUNT)
-        # if it tries to bud more child than it can - bud so many as it can and die.
-        if child_count*Animal.ENERGY_FOR_BUD > self.energy:
-            child_count = int(self.energy / Animal.ENERGY_FOR_BUD)
-            self.energy = 0
+    def can_make_n_children(self, child_count):
+        return child_count*Animal.ENERGY_FOR_BUD <= self.energy
 
-        print("{}\n{}".format("="*10, self._dna))
-        for _ in range(child_count):
-            self.energy -= Animal.ENERGY_FOR_BUD
-            child = Animal(self.world, Animal.mutate_dna(self.dna))
-            print(child.dna)
-            child.x = self.x + randint(-30, 30)
-            child.y = self.y + randint(-30, 30)
-            self.world.add_animal(child)
+    def make_child(mother, father):
+        mother.energy -= Animal.ENERGY_FOR_BUD
+        father.energy -= Animal.ENERGY_FOR_BUD
+        child = Animal(mother.world, Animal.mix_dna(mother.dna, father.dna))
+        print(child.dna)
+        child.x = mother.x + randint(-30, 30)
+        child.y = mother.y + randint(-30, 30)
+        mother.world.add_animal(child)
 
     def eat(self, food):
         value = min(World.World.EATING_VALUE, max(0, Animal.MAX_ENERGY - self.energy))
@@ -226,9 +226,12 @@ class Animal(object):
         return self._smell
 
     @property
+    def energy_fullness(self):
+        return self.energy / Animal.MAX_ENERGY
+
+    @property
     def dna(self):
         return self._dna
-
 
     @staticmethod
     def create_brain(dna):
@@ -273,7 +276,7 @@ class Animal(object):
     @staticmethod
     def mix_dna(dna1, dna2):
         m = randint(0, len(dna1))
-        if randint(0,1):
+        if randint(0, 1):
             return Animal.mutate_dna(dna1[:m] + dna2[m:])
         else:
             return Animal.mutate_dna(dna2[:m] + dna1[m:])
