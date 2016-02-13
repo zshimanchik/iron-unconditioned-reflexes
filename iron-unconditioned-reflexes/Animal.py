@@ -15,7 +15,7 @@ class Food(object):
         self.y = y
         self._size = size
         self._smell = (0, 1, 0,)
-        self._smell_size = self._size * World.World.SMELL_SIZE_RATIO
+        self._smell_size = self._size * World.World.FOOD_SMELL_SIZE_RATIO
         # self.lock = Lock()
 
     def beating(self, value):
@@ -32,7 +32,7 @@ class Food(object):
     @size.setter
     def size(self, value):
         self._size = max(0, value)
-        self._smell_size = self._size * World.World.SMELL_SIZE_RATIO
+        self._smell_size = self._size * World.World.FOOD_SMELL_SIZE_RATIO
 
     @property
     def smell_size(self):

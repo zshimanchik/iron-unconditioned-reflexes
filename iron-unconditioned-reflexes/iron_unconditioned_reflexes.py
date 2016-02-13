@@ -42,7 +42,7 @@ class MyWindow(Window):
         ln.Y1 = y1
         ln.X2 = x2
         ln.Y2 = y2
-        ln.StrokeThickness = 0.1
+        ln.StrokeThickness = 0.2
         ln.Stroke = brush
         self.canvas.Children.Add(ln)
         
@@ -68,9 +68,9 @@ class MyWindow(Window):
             smell_el.StrokeThickness = 0.03
             smell_el.Stroke = Brushes.Gray
 
-            smell_el.Height = World.World.SMELL_SIZE_RATIO * 2
-            smell_el.Width = World.World.SMELL_SIZE_RATIO * 2
-            smell_el.RenderTransform = TranslateTransform(-World.World.SMELL_SIZE_RATIO, -World.World.SMELL_SIZE_RATIO)
+            smell_el.Height = World.World.FOOD_SMELL_SIZE_RATIO * 2
+            smell_el.Width = World.World.FOOD_SMELL_SIZE_RATIO * 2
+            smell_el.RenderTransform = TranslateTransform(-World.World.FOOD_SMELL_SIZE_RATIO, -World.World.FOOD_SMELL_SIZE_RATIO)
         
             canvas.Children.Add(smell_el)
         
@@ -156,7 +156,8 @@ class MyWindow(Window):
 
         if self.chunks_checkBox.IsChecked:
             self.draw_grid(self.world.FEMALE_CHUNK_SIZE, Brushes.Gray)
-            self.draw_grid(self.world.FOOD_SMELL_CHUNK_SIZE, Brushes.Red)
+            self.draw_grid(self.world.FOOD_CHUNK_SIZE, Brushes.Red)
+            self.draw_grid(self.world.SMELL_CHUNK_SIZE, Brushes.DarkGreen)
 
         for animal in self.world.animals:
             if self.renew_animal_shapes_flag or not hasattr(animal, 'shape'):

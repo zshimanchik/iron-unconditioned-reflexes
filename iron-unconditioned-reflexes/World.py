@@ -21,7 +21,7 @@ class World(object):
 
     EATING_DISTANCE = 20
     EATING_VALUE = 0.03
-    SMELL_SIZE_RATIO = 13.0
+    FOOD_SMELL_SIZE_RATIO = 13.0
 
     APPEAR_FOOD_COUNT = 3
     APPEAR_FOOD_SIZE_MIN = 6
@@ -29,10 +29,12 @@ class World(object):
 
     SEX_DISTANCE = 20
 
-    FOOD_SMELL_CHUNK_SIZE = max(APPEAR_FOOD_SIZE_MAX * SMELL_SIZE_RATIO + Animal.SIZE, EATING_DISTANCE)
+    FOOD_CHUNK_SIZE = EATING_DISTANCE + Animal.SIZE
     FEMALE_CHUNK_SIZE = SEX_DISTANCE + Animal.SIZE * 2
-    ANIMAL_SMELL_CHUNK_SIZE = Animal.MAX_SMELL_SIZE
-    SMELL_CHUNK_SIZE = max(FOOD_SMELL_CHUNK_SIZE, ANIMAL_SMELL_CHUNK_SIZE)
+
+    FOOD_MAX_SMELL = APPEAR_FOOD_SIZE_MAX * FOOD_SMELL_SIZE_RATIO
+    ANIMAL_MAX_SMELL = Animal.MAX_SMELL_SIZE
+    SMELL_CHUNK_SIZE = max(FOOD_MAX_SMELL, ANIMAL_MAX_SMELL)
 
     def __init__(self, width, height):
         self.width = width
@@ -56,7 +58,7 @@ class World(object):
     @food_timer.setter
     def food_timer(self, value):
         self._food_timer = int(value * (self.width * self.height) / (200 * 500))
- 
+
 
     def restart(self):
         self.animals = [Animal(self) for _ in range(35)]
@@ -66,16 +68,15 @@ class World(object):
 
     def update(self):
         self.time += 1
-        self.food_smell_chunks = self._make_empty_chunks(self.FOOD_SMELL_CHUNK_SIZE)
+        self.food_chunks = self._make_empty_chunks(self.FOOD_CHUNK_SIZE)
         self.female_chunks = self._make_empty_chunks(self.FEMALE_CHUNK_SIZE)
-        self.animal_smell_chunks = self._make_empty_chunks(self.ANIMAL_SMELL_CHUNK_SIZE)
         self.smell_chunks = self._make_empty_chunks(self.SMELL_CHUNK_SIZE)
 
         for food in self.food:
             self.check_in_bounds(food)
-            # food smell chunks
-            chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.FOOD_SMELL_CHUNK_SIZE)
-            self.food_smell_chunks[chunk_row][chunk_col].append(food)
+            # food chunks
+            chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.FOOD_CHUNK_SIZE)
+            self.food_chunks[chunk_row][chunk_col].append(food)
             # smell chunks
             chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.SMELL_CHUNK_SIZE)
             self.smell_chunks[chunk_row][chunk_col].append(food)
@@ -87,9 +88,6 @@ class World(object):
                 chunk_row, chunk_col = self.get_chunk_index(animal.x, animal.y, self.FEMALE_CHUNK_SIZE)
                 self.female_chunks[chunk_row][chunk_col].append(animal)
             # smell chunks
-            chunk_row, chunk_col = self.get_chunk_index(animal.x, animal.y, self.ANIMAL_SMELL_CHUNK_SIZE)
-            self.animal_smell_chunks[chunk_row][chunk_col].append(animal)
-            # general smell chunks
             chunk_row, chunk_col = self.get_chunk_index(animal.x, animal.y, self.SMELL_CHUNK_SIZE)
             self.smell_chunks[chunk_row][chunk_col].append(animal)
 
@@ -162,15 +160,11 @@ class World(object):
             for element in chunk:
                 yield element
 
-
     def adjacent_food(self, x, y):
-        return self._adjacent_elements(self.food_smell_chunks, self.FOOD_SMELL_CHUNK_SIZE, x, y)
+        return self._adjacent_elements(self.food_chunks, self.FOOD_CHUNK_SIZE, x, y)
 
     def adjacent_females(self, x, y):
         return self._adjacent_elements(self.female_chunks, self.FEMALE_CHUNK_SIZE, x, y)
-
-    def adjacent_animals(self, x, y):
-        return self._adjacent_elements(self.animal_smell_chunks, self.ANIMAL_SMELL_CHUNK_SIZE, x, y)
 
     def adjacent_smells(self, x, y):
         return self._adjacent_elements(self.smell_chunks, self.SMELL_CHUNK_SIZE, x, y)
