@@ -28,7 +28,6 @@ class World(object):
     APPEAR_FOOD_SIZE_MAX = 10
 
     SEX_DISTANCE = 20
-    SMELL_DIMENSIONS = 3
 
     FOOD_SMELL_CHUNK_SIZE = max(APPEAR_FOOD_SIZE_MAX * SMELL_SIZE_RATIO + Animal.SIZE, EATING_DISTANCE)
     FEMALE_CHUNK_SIZE = SEX_DISTANCE + Animal.SIZE * 2
@@ -124,7 +123,7 @@ class World(object):
             queue.task_done()
 
     def get_sensor_value(self, pos):
-        res = [0] * World.SMELL_DIMENSIONS
+        res = [0] * Animal.SENSOR_DIMENSION
         for smeller in self.adjacent_smells(*pos):
             try:
                 smell_strength = 1.0 - distance(smeller.x, smeller.y, pos[0], pos[1]) / smeller.smell_size
