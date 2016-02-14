@@ -15,8 +15,6 @@ def close_enough(animal1, animal2, max_distance):
 
 
 class World(object):
-    THREADS_COUNT = 3
-
     MAX_ANIMAL_COUNT = 100
 
     EATING_DISTANCE = 20
@@ -36,7 +34,9 @@ class World(object):
     ANIMAL_MAX_SMELL = Animal.MAX_SMELL_SIZE
     SMELL_CHUNK_SIZE = max(FOOD_MAX_SMELL, ANIMAL_MAX_SMELL)
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, thread_count=3):
+        self.thread_count = 3
+
         self.width = width
         self.height = height
 
@@ -44,12 +44,28 @@ class World(object):
         self._food_timer = 80
 
         self.queue = Queue()
-        self.threads = []
-        for _ in range(World.THREADS_COUNT):
+        self._init_workers()
+
+    def _init_workers(self):
+        self.workers = []
+        for _ in range(self.thread_count):
             t = Thread(target=self.animal_worker, args=[self.queue])
             t.daemon = True
             t.start()
-            self.threads.append(t)
+            self.workers.append(t)
+
+    def restart(self):
+        self.animals = [Animal(self) for _ in range(35)]
+        self.animals_to_add = []
+        self.food = [self._make_random_food() for _ in range(80)]
+        self.time = 0
+
+    def _make_random_food(self):
+        return Food(
+                randint(3, self.width),
+                randint(3, self.height),
+                randint(World.APPEAR_FOOD_SIZE_MIN, World.APPEAR_FOOD_SIZE_MAX)
+        )
 
     @property
     def food_timer(self):
@@ -58,13 +74,6 @@ class World(object):
     @food_timer.setter
     def food_timer(self, value):
         self._food_timer = int(value * (self.width * self.height) / (200 * 500))
-
-
-    def restart(self):
-        self.animals = [Animal(self) for _ in range(35)]
-        self.animals_to_add = []
-        self.food = [Food(randint(3, self.width), randint(3, self.height), randint(World.APPEAR_FOOD_SIZE_MIN, World.APPEAR_FOOD_SIZE_MAX)) for _ in range(80)]
-        self.time = 0
 
     def update(self):
         self.time += 1
