@@ -35,7 +35,7 @@ class World(object):
     SMELL_CHUNK_SIZE = max(FOOD_MAX_SMELL, ANIMAL_MAX_SMELL)
 
     def __init__(self, width, height, thread_count=3):
-        self.thread_count = 3
+        self.thread_count = thread_count
 
         self.width = width
         self.height = height
