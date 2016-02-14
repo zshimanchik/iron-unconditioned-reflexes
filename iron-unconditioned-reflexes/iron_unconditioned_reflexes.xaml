@@ -17,36 +17,16 @@
                 <TextBlock Text="{Binding Path=Value, ElementName=scale_slider, StringFormat=Scale: {0:#.##}}" HorizontalAlignment="Left" Margin="0,26,0,0" VerticalAlignment="Top"/>
                 <TextBlock Text="{Binding Path=Value, ElementName=food_slider, StringFormat=Food: {0:#}}" HorizontalAlignment="Left" Margin="0,55,0,0" VerticalAlignment="Top"/>
                 <TextBlock x:Name="label4" Text="Label" HorizontalAlignment="Left" Margin="0,129,0,0" VerticalAlignment="Top"/>
-                <CheckBox x:Name="chunks_checkBox" Content="draw chunks" HorizontalAlignment="Left" Margin="207,80,0,0" VerticalAlignment="Top"/>
-                <CheckBox x:Name="food_smell_checkBox" Content="food smell" HorizontalAlignment="Left" Margin="208,100,0,0" VerticalAlignment="Top" Checked="renew_food_shapes" Unchecked="renew_food_shapes"/>
-                <CheckBox x:Name="eat_distance_checkBox" Content="eat distance" HorizontalAlignment="Left" Margin="208,121,0,0" VerticalAlignment="Top" Checked="renew_food_shapes" Unchecked="renew_food_shapes"/>
-                <CheckBox x:Name="animal_smell_checkBox" Content="animal smell" HorizontalAlignment="Left" Margin="208,141,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="chunks_checkBox" IsChecked="false" Content="draw chunks" HorizontalAlignment="Left" Margin="207,80,0,0" VerticalAlignment="Top" Checked="chunks_changed" Unchecked="chunks_changed" />
+                <CheckBox x:Name="food_smell_checkBox" IsChecked="false" Content="food smell" HorizontalAlignment="Left" Margin="208,100,0,0" VerticalAlignment="Top" Checked="food_smell_changed" Unchecked="food_smell_changed"/>
+                <CheckBox x:Name="eat_distance_checkBox" IsChecked="false" Content="eat distance" HorizontalAlignment="Left" Margin="208,121,0,0" VerticalAlignment="Top" Checked="eat_distance_changed" Unchecked="eat_distance_changed"/>
+                <CheckBox x:Name="animal_smell_checkBox" IsChecked="false" Content="animal smell" HorizontalAlignment="Left" Margin="208,141,0,0" VerticalAlignment="Top" Checked="animal_smell_changed" Unchecked="animal_smell_changed"/>
 
             </Grid>
             <Canvas
                 x:Name="parent_canvas" DockPanel.Dock="Left">
                 <Canvas x:Name="canvas" SizeChanged="canvas_SizeChanged" Background="#FFD8D8D8" MouseMove="canvas_MouseMove" MouseWheel="canvas_MouseWheel" Width="{Binding ActualWidth, ElementName=parent_canvas, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=parent_canvas, Mode=OneWay}" MouseLeave="canvas_MouseLeave" MouseRightButtonDown="canvas_MouseRightButtonDown" MouseRightButtonUp="canvas_MouseRightButtonUp" MouseLeftButtonDown="canvas_MouseLeftButtonDown">
-                    <Canvas RenderTransformOrigin="0,0" Height="1" Width="1">
-                        <Ellipse Fill="Yellow" Height="1" Width="1" >
-                            <Ellipse.RenderTransform>
-                                <TranslateTransform X="-0.5" Y="-0.5"/>
-                            </Ellipse.RenderTransform>
-                        </Ellipse>
-                        <Line X1="0.5" Y1="0.5" X2="1" Y2="0.5" Stroke="Black" StrokeThickness="0.1">
-                            <Line.RenderTransform>
-                                <TranslateTransform X="-0.5" Y="-0.5"/>
-                            </Line.RenderTransform>
-                        </Line>
-                    </Canvas>
-                    <Ellipse Fill="Yellow" HorizontalAlignment="Left" Height="31" Stroke="Black" StrokeThickness="2" VerticalAlignment="Top" Width="33" Canvas.Left="57" Canvas.Top="147"/>
-                    <Ellipse x:Name="el1" HorizontalAlignment="Left" Height="89" Stroke="Black" StrokeThickness="2" VerticalAlignment="Top" Width="89" Canvas.Left="40" Canvas.Top="73">
-                        <Ellipse.Fill>
-                            <RadialGradientBrush>
-                                <GradientStop Color="#FF00DC14" Offset="0"/>
-                                <GradientStop Color="#00000000" Offset="1"/>
-                            </RadialGradientBrush>
-                        </Ellipse.Fill>
-                    </Ellipse>
+
                 </Canvas>
             </Canvas>
         </DockPanel>

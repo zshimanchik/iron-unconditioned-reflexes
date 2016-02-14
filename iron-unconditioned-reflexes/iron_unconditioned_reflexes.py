@@ -3,142 +3,48 @@
 from System import TimeSpan
 from System.Windows import Application, Window, Point
 from System.Windows.Threading import DispatcherTimer
-from System.Windows.Shapes import *
-from System.Windows.Controls import Grid, Canvas
-from System.Windows.Media import Brushes, ScaleTransform, TranslateTransform, RotateTransform, TransformGroup, RadialGradientBrush, Color
+from System.Windows.Media import ScaleTransform
 
-import math
 from time import time
 
 import World
-from Animal import Gender
 from animal_window import AnimalWindow
+from renderer import Renderer
 
 
 class MyWindow(Window):
     def __init__(self):        
         self.mouse_drag = False
-        self.renew_food_shapes_flag = True
-        self.renew_animal_shapes_flag = True
-        self.world = World.World(500, 200)
-        self.mouse_start_point = Point(0, 0)
-        
-        self.timer= DispatcherTimer()        
-        self.timer.Tick += self.dispatcherTimer_Tick
-        self.timer.Interval = TimeSpan(0, 0, 0, 0, 100)
-        self.timer.Start()
-        self.start_time = time()
-
-        self.window = wpf.LoadComponent(self, 'iron_unconditioned_reflexes.xaml') 
-        self.timer.Interval = TimeSpan(0, 0, 0, 0, self.timer_slider.Value)
-        self.world.food_timer = self.food_slider.Value
-
         self.animal_window = None
         self.selected_animal = None
+        self.mouse_start_point = Point(0, 0)
+        self.start_time = time()
+
+        self.world = World.World(500, 200)
+
+        self.window = wpf.LoadComponent(self, 'iron_unconditioned_reflexes.xaml')
+        self._create_and_start_timer()
+
+        self._renderer = Renderer(self.canvas, self.world)
+
+        self.world.food_timer = self.food_slider.Value
+
+        self._renderer.draw_food_smell = self.food_smell_checkBox.IsChecked
+        self._renderer.draw_eat_distance = self.eat_distance_checkBox.IsChecked
+        self._renderer.draw_chunks = self.chunks_checkBox.IsChecked
+        self._renderer.draw_animal_smell = self.animal_smell_checkBox.IsChecked
+
+    def _create_and_start_timer(self):
+        self.timer = DispatcherTimer()
+        self.timer.Tick += self.dispatcherTimer_Tick
+        self.timer.Interval = TimeSpan(0, 0, 0, 0, self.timer_slider.Value)
+        self.timer.Start()
         
-    def add_line(self, x1, y1, x2, y2, brush=Brushes.Gray):
-        ln = Line()
-        ln.X1 = x1
-        ln.Y1 = y1
-        ln.X2 = x2
-        ln.Y2 = y2
-        ln.StrokeThickness = 0.2
-        ln.Stroke = brush
-        self.canvas.Children.Add(ln)
-        
-
-
-    def make_food_shape(self):
-        canvas = Canvas()
-
-        el = Ellipse()
-        el.Fill = Brushes.Gray
-        el.Height=1
-        el.Width=1
-        el.RenderTransform = TranslateTransform(-0.5, -0.5)
-        canvas.Children.Add(el)
-
-        if self.food_smell_checkBox.IsChecked:
-            smell_el = Ellipse()
-
-            color1 = Color.FromArgb(40, 0, 220, 20)
-            color2 = Color.FromArgb(0, 0, 220, 20)
-            smell_el.Fill = RadialGradientBrush(color1, color2)
-
-            smell_el.StrokeThickness = 0.03
-            smell_el.Stroke = Brushes.Gray
-
-            smell_el.Height = World.World.FOOD_SMELL_SIZE_RATIO * 2
-            smell_el.Width = World.World.FOOD_SMELL_SIZE_RATIO * 2
-            smell_el.RenderTransform = TranslateTransform(-World.World.FOOD_SMELL_SIZE_RATIO, -World.World.FOOD_SMELL_SIZE_RATIO)
-        
-            canvas.Children.Add(smell_el)
-        
-        canvas.SetZIndex(el, 1)
-        return canvas
-
-    def make_eat_distance_shape(self, food):
-        canvas = Canvas()
-
-        eat_el =Ellipse()
-        eat_el.StrokeThickness = 0.1
-        eat_el.Stroke = Brushes.Black
-        size = World.World.EATING_DISTANCE + food.size
-        eat_el.Height = size*2
-        eat_el.Width = size*2
-        eat_el.RenderTransform = TranslateTransform(-size + food.x, -size + food.y)
-        canvas.Children.Add(eat_el)
-        return canvas
-
-    def make_smell_shape(self, animal):
-        canvas = Canvas()
-        smell_el = Ellipse()
-
-        color1 = Color.FromArgb(40, 220, 0, 20)
-        color2 = Color.FromArgb(0, 220, 0, 20)
-        smell_el.Fill = RadialGradientBrush(color1, color2)
-
-        smell_el.StrokeThickness = 0.1
-        smell_el.Stroke = Brushes.Gray
-
-        smell_el.Height = animal.smell_size * 2
-        smell_el.Width = animal.smell_size * 2
-        smell_el.RenderTransform = TranslateTransform(-animal.smell_size, -animal.smell_size)
-
-        canvas.Children.Add(smell_el)
-        return canvas
-
-    def make_animal_shape(self, animal):
-        canvas = Canvas()
-
-        el = Ellipse()
-        if animal == self.selected_animal:
-            el.Fill = Brushes.Gold
-        elif animal.gender == Gender.FEMALE:
-            el.Fill = Brushes.DarkRed
-        else:
-            el.Fill = Brushes.Green
-
-        el.Height=1
-        el.Width=1
-        el.RenderTransform = TranslateTransform(-0.5, -0.5)
-
-        ln = Line()
-        ln.X1 = 0.5
-        ln.Y1 = 0.5
-        ln.X2 = 1
-        ln.Y2 = 0.5
-        ln.StrokeThickness = 0.1
-        ln.Stroke = Brushes.Black
-        ln.RenderTransform = TranslateTransform(-0.5, -0.5)
-
-        canvas.Children.Add(el)
-        canvas.Children.Add(ln)
-        canvas.RenderTransformOrigin = Point(0, 0)
-        
-        return canvas
-
     def dispatcherTimer_Tick(self, sender, e):
+        # if self.world.time == 150000:
+        #     self.world.restart()
+        #     self._renderer.restart()
+
         if (self.world.time % 10 == 0):
             performance = (time() - self.start_time) / 10.0
             self.label1.Text = "performance={}".format(performance)
@@ -147,59 +53,10 @@ class MyWindow(Window):
         self.label.Text = "world time={} w={} h={}".format(self.world.time, self.world.width, self.world.height)
         self.label4.Text = "animal count={}\nfood count={}".format(len(self.world.animals), len(self.world.food))        
         self.world.update()
-        self.draw()
+        self._renderer.render()
         if self.animal_window:
             self.animal_window.draw_animal_brain()
 
-    def draw(self):
-        self.canvas.Children.Clear()
-
-        if self.chunks_checkBox.IsChecked:
-            self.draw_grid(self.world.FEMALE_CHUNK_SIZE, Brushes.Gray)
-            self.draw_grid(self.world.FOOD_CHUNK_SIZE, Brushes.Red)
-            self.draw_grid(self.world.SMELL_CHUNK_SIZE, Brushes.DarkGreen)
-
-        for animal in self.world.animals:
-            if self.renew_animal_shapes_flag or not hasattr(animal, 'shape'):
-                animal.shape = self.make_animal_shape(animal)
-                self.canvas.SetZIndex(animal.shape, 2)
-            tg = TransformGroup()
-            tg.Children.Add(ScaleTransform(animal.size, animal.size))
-            tg.Children.Add(RotateTransform(math.degrees(animal.angle)))
-            tg.Children.Add(TranslateTransform(animal.x, animal.y))
-            animal.shape.RenderTransform = tg            
-            self.canvas.Children.Add(animal.shape)
-
-            if self.animal_smell_checkBox.IsChecked:
-                smell_el = self.make_smell_shape(animal)
-                smell_el.RenderTransform = TranslateTransform(animal.x, animal.y)
-                self.canvas.Children.Add(smell_el)
-
-        self.renew_animal_shapes_flag = False
-
-        for food in self.world.food:
-            if self.renew_food_shapes_flag or not hasattr(food, 'shape'):
-                food.shape = self.make_food_shape()
-                
-            tg = TransformGroup()
-            tg.Children.Add(ScaleTransform(food.size, food.size))
-            tg.Children.Add(TranslateTransform(food.x, food.y))
-            food.shape.RenderTransform = tg
-            self.canvas.Children.Add(food.shape)
-
-            if self.eat_distance_checkBox.IsChecked:
-                eat_shape = self.make_eat_distance_shape(food) #xxx
-                self.canvas.Children.Add(eat_shape)
-                
-        self.renew_food_shapes_flag = False
-
-    def draw_grid(self, size, brush):
-        for row in range(1, int(self.world.height / size)+1):
-            self.add_line(0, size * row, self.world.width, size * row, brush)
-
-        for col in range(1, int(self.world.width/ size)+1):
-            self.add_line(size * col, 0, size * col, self.world.height, brush)
-                    
     def timer_slider_ValueChanged(self, sender, e):        
         self.timer.Interval = TimeSpan(0, 0, 0, 0, sender.Value)
     
@@ -239,9 +96,18 @@ class MyWindow(Window):
     
     def food_slider_ValueChanged(self, sender, e):
         self.world.food_timer = int(sender.Value)
-    
-    def renew_food_shapes(self, sender, e):
-        self.renew_food_shapes_flag = True
+
+    def food_smell_changed(self, sender, e):
+        self._renderer.draw_food_smell = self.food_smell_checkBox.IsChecked
+
+    def eat_distance_changed(self, sender, e):
+        self._renderer.draw_eat_distance = self.eat_distance_checkBox.IsChecked
+
+    def chunks_changed(self, sender, e):
+        self._renderer.draw_chunks = self.chunks_checkBox.IsChecked
+
+    def animal_smell_changed(self, sender, e):
+        self._renderer.draw_animal_smell = self.animal_smell_checkBox.IsChecked
     
     def MenuItem_Click(self, sender, e):
         if self.animal_window is None or not self.animal_window.IsLoaded:
@@ -252,9 +118,9 @@ class MyWindow(Window):
     def canvas_MouseLeftButtonDown(self, sender, e):
         point = e.GetPosition(self.canvas)
         self.selected_animal = self.world.get_animal(point.X, point.Y)
+        self._renderer.selected_animal = self.selected_animal
         if self.animal_window:
             self.animal_window.animal = self.selected_animal
-        self.renew_animal_shapes_flag = True
 
 
 if __name__ == '__main__':

@@ -57,6 +57,8 @@ class World(object):
     def restart(self):
         self.animals = [Animal(self) for _ in range(35)]
         self.animals_to_add = []
+        self.dead_animals = []
+        self.empty_food = []
         self.food = [self._make_random_food() for _ in range(80)]
         self.time = 0
 
@@ -190,15 +192,19 @@ class World(object):
         return (int(y / chunk_size), int(x / chunk_size))
 
     def _remove_dead_animals(self):
+        self.dead_animals = []
         for animal in self.animals[:]:
             if animal.energy <= 0:
                 # self.food.append(Food(randint(0, self.width),randint(0, self.height), animal.size))
                 self.animals.remove(animal)
+                self.dead_animals.append(animal)
 
     def _clear_empty_food(self):
+        self.empty_food = []
         for food in self.food[:]:
             if food.size <= 0:
                 self.food.remove(food)
+                self.empty_food.append(food)
 
     def add_animal(self, animal):
         self.animals_to_add.append(animal)
