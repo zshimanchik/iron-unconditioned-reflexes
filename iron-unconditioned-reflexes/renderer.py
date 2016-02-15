@@ -6,7 +6,6 @@ from System.Windows.Media import Brushes, ScaleTransform, TranslateTransform, Ro
 import math
 
 from Animal import Gender
-import World
 
 
 class Renderer(object):
@@ -253,10 +252,12 @@ class FoodShape(object):
         self._smell_ellipse.StrokeThickness = 0.03
         self._smell_ellipse.Stroke = Brushes.Gray
 
-        self._smell_ellipse.Height = World.World.FOOD_SMELL_SIZE_RATIO * 2
-        self._smell_ellipse.Width = World.World.FOOD_SMELL_SIZE_RATIO * 2
-        self._smell_ellipse.RenderTransform = \
-            TranslateTransform(-World.World.FOOD_SMELL_SIZE_RATIO, -World.World.FOOD_SMELL_SIZE_RATIO)
+        self._smell_ellipse.Height = self._renderer.world.constants.FOOD_SMELL_SIZE_RATIO * 2
+        self._smell_ellipse.Width = self._renderer.world.constants.FOOD_SMELL_SIZE_RATIO * 2
+        self._smell_ellipse.RenderTransform = TranslateTransform(
+                -self._renderer.world.constants.FOOD_SMELL_SIZE_RATIO,
+                -self._renderer.world.constants.FOOD_SMELL_SIZE_RATIO
+        )
 
     def _create_eat_distance_shape(self):
         self._eat_distance_canvas = Canvas()
@@ -279,7 +280,7 @@ class FoodShape(object):
 
         self._body_canvas.RenderTransform = ScaleTransform(self._food.size, self._food.size)
 
-        eat_distance_size = (World.World.EATING_DISTANCE + self._food.size) * 2
+        eat_distance_size = (self._renderer.world.constants.EATING_DISTANCE + self._food.size) * 2
         self._eat_distance_canvas.RenderTransform = ScaleTransform(eat_distance_size, eat_distance_size)
 
         self.canvas.RenderTransform = TranslateTransform(self._food.x, self._food.y)

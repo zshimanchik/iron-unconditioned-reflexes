@@ -10,6 +10,7 @@ from time import time
 import World
 from animal_window import AnimalWindow
 from renderer import Renderer
+from world_constants import WorldConstants
 
 
 class MyWindow(Window):
@@ -20,7 +21,7 @@ class MyWindow(Window):
         self.mouse_start_point = Point(0, 0)
         self.start_time = time()
 
-        self.world = World.World(500, 200)
+        self.world = World.World(500, 200, constants=WorldConstants())
 
         self.window = wpf.LoadComponent(self, 'iron_unconditioned_reflexes.xaml')
         self._create_and_start_timer()
