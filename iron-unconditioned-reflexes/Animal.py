@@ -176,7 +176,7 @@ class Animal(object):
             mother.make_child(father)
 
         mother.readiness_to_sex = 0
-        father.readiness_to_bud = 0
+        father.readiness_to_sex = 0
 
     def can_make_n_children(self, child_count):
         return child_count*Animal.ENERGY_FOR_BUD <= self.energy
