@@ -52,6 +52,7 @@ class Renderer(object):
             if not hasattr(animal, 'shape'):
                 animal.shape = AnimalShape(animal, self)
                 self.canvas.Children.Add(animal.shape.canvas)
+                self.canvas.SetZIndex(animal.shape.canvas, 2)
                 self.animal_shapes.append(animal.shape)
             animal.shape.update_state()
 
