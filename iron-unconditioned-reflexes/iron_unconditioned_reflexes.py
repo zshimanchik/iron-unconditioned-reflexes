@@ -47,17 +47,24 @@ class MyWindow(Window):
         #     self.world.restart()
         #     self._renderer.restart()
 
-        if (self.world.time % 10 == 0):
-            performance = (time() - self.start_time) / 10.0
-            self.label1.Text = "performance={}".format(performance)
-            self.start_time = time()
+        self._check_performance()
+        self._show_world_info_in_ui()
 
-        self.label.Text = "world time={} w={} h={}".format(self.world.time, self.world.width, self.world.height)
-        self.label4.Text = "animal count={}\nfood count={}".format(len(self.world.animals), len(self.world.food))        
         self.world.update()
         self._renderer.render()
         if self.animal_window:
             self.animal_window.update()
+
+    def _check_performance(self):
+        if self.world.time % 10 == 0:
+            performance = (time() - self.start_time) / 10.0
+            self.performance_textblock.Text = "performance={}".format(performance)
+            self.start_time = time()
+
+    def _show_world_info_in_ui(self):
+        self.world_time_textblock.Text = "world time={}".format(self.world.time)
+        self.animal_count_textblock.Text = "animal count={}".format(len(self.world.animals))
+        self.food_count_textblock.Text = "food count={}".format(len(self.world.food))
 
     def timer_slider_ValueChanged(self, sender, e):        
         self.timer.Interval = TimeSpan(0, 0, 0, 0, sender.Value)
