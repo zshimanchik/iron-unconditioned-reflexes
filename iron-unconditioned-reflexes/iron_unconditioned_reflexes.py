@@ -11,6 +11,7 @@ import World
 from animal_window import AnimalWindow
 from renderer import Renderer
 from world_constants import WorldConstants
+from simulation_scenario import SimulationScenario
 
 
 class MyWindow(Window):
@@ -35,6 +36,8 @@ class MyWindow(Window):
         self._renderer.draw_chunks = self.chunks_checkBox.IsChecked
         self._renderer.draw_animal_smell = self.animal_smell_checkBox.IsChecked
 
+        self._simulation_scenario = SimulationScenario(self)
+
     def _create_and_start_timer(self):
         self.timer = DispatcherTimer()
         self.timer.Tick += self.dispatcherTimer_Tick
@@ -42,11 +45,7 @@ class MyWindow(Window):
         self.timer.Start()
         
     def dispatcherTimer_Tick(self, sender, e):
-        # if self.world.time == 150000:
-        #     self.world.constants.MIDDLE_LAYERS_SIZES = [randint(2,3) for _ in range(randint(1,3))]
-        #     self.world.restart()
-        #     self._renderer.restart()
-
+        self._simulation_scenario.tic()
         self._check_performance()
         self._show_world_info_in_ui()
 
