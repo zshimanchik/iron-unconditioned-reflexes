@@ -15,7 +15,7 @@ class AnimalWindow(Window):
 
         self.canvas.Children.Clear()
         brain = self.animal.brain
-        width_count = max(len(brain.input_layer), len(brain.middle_layer), len(brain.output_layer))
+        width_count = max(len(brain.layers[0]), len(brain.layers[1]), len(brain.layers[-1]))
         neuron_size = min(self.canvas.ActualWidth / (width_count * 1.5), self.canvas.ActualHeight / (3.0 * 2.0))
         
         for layer_index, layer in enumerate(brain):
@@ -29,12 +29,12 @@ class AnimalWindow(Window):
                 self.canvas.SetTop(el, layer_index * neuron_size * 2) 
                 self.canvas.SetLeft(el, neuron_index * (neuron_size + neuron_margin) + neuron_margin)
 
-        input_layer_margin = (self.canvas.ActualWidth - len(brain.input_layer) * neuron_size) / (len(brain.input_layer) + 1)
-        middle_layer_margin = (self.canvas.ActualWidth - len(brain.middle_layer) * neuron_size) / (len(brain.middle_layer) + 1)
-        output_layer_margin = (self.canvas.ActualWidth - len(brain.output_layer) * neuron_size) / (len(brain.output_layer) + 1)
+        input_layer_margin = (self.canvas.ActualWidth - len(brain.layers[0]) * neuron_size) / (len(brain.layers[0]) + 1)
+        middle_layer_margin = (self.canvas.ActualWidth - len(brain.layers[1]) * neuron_size) / (len(brain.layers[1]) + 1)
+        output_layer_margin = (self.canvas.ActualWidth - len(brain.layers[-1]) * neuron_size) / (len(brain.layers[-1]) + 1)
         
-        for middle_neuron_index, middle_neuron in enumerate(brain.middle_layer):
-            for input_neuron_index, input_neuron in enumerate(brain.input_layer):
+        for middle_neuron_index, middle_neuron in enumerate(brain.layers[1]):
+            for input_neuron_index, input_neuron in enumerate(brain.layers[0]):
                 line = Line()
                 line.X1 = middle_layer_margin + middle_neuron_index * (neuron_size + middle_layer_margin) + neuron_size / 2.0
                 line.Y1 = 1 * neuron_size * 2.0 + neuron_size / 2.0
@@ -44,8 +44,8 @@ class AnimalWindow(Window):
                 line.Stroke = SolidColorBrush(get_color(middle_neuron.w[input_neuron_index]))
                 self.canvas.AddChild(line)
 
-        for output_neuron_index, output_neuron in enumerate(brain.output_layer):
-            for middle_neuron_index, middle_neuron in enumerate(brain.middle_layer):
+        for output_neuron_index, output_neuron in enumerate(brain.layers[-1]):
+            for middle_neuron_index, middle_neuron in enumerate(brain.layers[1]):
                 line = Line()
                 line.X1 = output_layer_margin + output_neuron_index * (neuron_size + output_layer_margin) + neuron_size / 2.0
                 line.Y1 = 2 * neuron_size * 2.0 + neuron_size / 2.0

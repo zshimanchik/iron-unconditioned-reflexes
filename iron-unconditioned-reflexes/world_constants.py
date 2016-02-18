@@ -23,7 +23,7 @@ class WorldConstants(object):
     ANIMAL_SENSOR_COUNT = 7
     ANIMAL_SENSOR_DIMENSION = 3  # how many values in one sensor
 
-    MIDDLE_LAYER_SIZE = 2
+    MIDDLE_LAYERS_SIZES = [2, 2]
     OUTPUT_LAYER_SIZE = 3
 
     # DNA
@@ -45,9 +45,15 @@ class WorldConstants(object):
     def __init__(self):
         pass
 
+    # todo create cached properties instead of this for optimization
+
     @property
     def INPUT_LAYER_SIZE(self):
         return self.ANIMAL_SENSOR_COUNT * self.ANIMAL_SENSOR_DIMENSION
+
+    @property
+    def NEURAL_NETWORK_SHAPE(self):
+        return [self.INPUT_LAYER_SIZE] + self.MIDDLE_LAYERS_SIZES + [self.OUTPUT_LAYER_SIZE]
 
     @property
     def DNA_MAX_VALUE(self):
@@ -59,7 +65,9 @@ class WorldConstants(object):
 
     @property
     def DNA_FOR_BRAIN_LEN(self):
-        return (self.MIDDLE_LAYER_SIZE * (self.INPUT_LAYER_SIZE + 1) + self.OUTPUT_LAYER_SIZE * (self.MIDDLE_LAYER_SIZE + 1)) * self.DNA_BRAIN_VALUE_LEN
+        shape = self.NEURAL_NETWORK_SHAPE
+        connection_count = sum([ shape[i] * (shape[i+1] + 1) for i in range(len(shape)-1)])
+        return connection_count * self.DNA_BRAIN_VALUE_LEN
 
     @property
     def DNA_LEN(self):

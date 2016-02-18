@@ -210,7 +210,7 @@ class Animal(object):
                 yield (int(cur, world_constants.DNA_BASE) - world_constants.DNA_HALF_MAX_VALUE) / world_constants.DNA_HALF_MAX_VALUE
 
         dna = dna_iter(dna)
-        brain = NeuralNetwork([world_constants.INPUT_LAYER_SIZE, world_constants.MIDDLE_LAYER_SIZE, world_constants.OUTPUT_LAYER_SIZE])
+        brain = NeuralNetwork(world_constants.NEURAL_NETWORK_SHAPE)
         for layer in brain:
             for neuron in layer:
                 neuron.w = [dna.next() for _ in range(len(neuron.w))]
