@@ -9,10 +9,18 @@ class AnimalWindow(Window):
         wpf.LoadComponent(self, 'animal_window.xaml')
         self.animal = None
 
-    def draw_animal_brain(self):
+    def update(self):
         if not self.animal:
             return
+        self.draw_animal_brain()
+        self.textBlock.Text = "energy={}\nenergy_fullness={}\nreadiness_to_sex={}\nsmell_size={}".format(
+            self.animal.energy,
+            self.animal.energy_fullness,
+            self.animal.readiness_to_sex,
+            self.animal.smell_size
+        )
 
+    def draw_animal_brain(self):
         self.canvas.Children.Clear()
         brain = self.animal.brain
         width_count = max(len(brain.layers[0]), len(brain.layers[1]), len(brain.layers[-1]))
@@ -29,30 +37,22 @@ class AnimalWindow(Window):
                 self.canvas.SetTop(el, layer_index * neuron_size * 2) 
                 self.canvas.SetLeft(el, neuron_index * (neuron_size + neuron_margin) + neuron_margin)
 
-        input_layer_margin = (self.canvas.ActualWidth - len(brain.layers[0]) * neuron_size) / (len(brain.layers[0]) + 1)
-        middle_layer_margin = (self.canvas.ActualWidth - len(brain.layers[1]) * neuron_size) / (len(brain.layers[1]) + 1)
-        output_layer_margin = (self.canvas.ActualWidth - len(brain.layers[-1]) * neuron_size) / (len(brain.layers[-1]) + 1)
-        
-        for middle_neuron_index, middle_neuron in enumerate(brain.layers[1]):
-            for input_neuron_index, input_neuron in enumerate(brain.layers[0]):
-                line = Line()
-                line.X1 = middle_layer_margin + middle_neuron_index * (neuron_size + middle_layer_margin) + neuron_size / 2.0
-                line.Y1 = 1 * neuron_size * 2.0 + neuron_size / 2.0
-                line.X2 = input_layer_margin + input_neuron_index * (neuron_size + input_layer_margin) + neuron_size / 2.0
-                line.Y2 = 0 * neuron_size * 2.0 + neuron_size / 2.0
-                line.StrokeThickness = 2
-                line.Stroke = SolidColorBrush(get_color(middle_neuron.w[input_neuron_index]))
-                self.canvas.AddChild(line)
+        for i in range(len(brain)-1):
+            self.draw_layers_connections(brain, i, i+1, neuron_size)
 
-        for output_neuron_index, output_neuron in enumerate(brain.layers[-1]):
-            for middle_neuron_index, middle_neuron in enumerate(brain.layers[1]):
+
+    def draw_layers_connections(self, brain, first_layer_index, second_layer_index, neuron_size):
+        first_layer_margin = (self.canvas.ActualWidth - len(brain.layers[first_layer_index]) * neuron_size) / (len(brain.layers[first_layer_index]) + 1)
+        second_layer_margin = (self.canvas.ActualWidth - len(brain.layers[second_layer_index]) * neuron_size) / (len(brain.layers[second_layer_index]) + 1)
+        for second_layer_neuron_index, second_layer_neuron in enumerate(brain.layers[second_layer_index]):
+            for first_layer_neuron_index, first_layer_neuron in enumerate(brain.layers[first_layer_index]):
                 line = Line()
-                line.X1 = output_layer_margin + output_neuron_index * (neuron_size + output_layer_margin) + neuron_size / 2.0
-                line.Y1 = 2 * neuron_size * 2.0 + neuron_size / 2.0
-                line.X2 = middle_layer_margin + middle_neuron_index * (neuron_size + middle_layer_margin) + neuron_size / 2.0
-                line.Y2 = 1 * neuron_size * 2.0 + neuron_size / 2.0                
+                line.X1 = second_layer_margin + second_layer_neuron_index * (neuron_size + second_layer_margin) + neuron_size / 2.0
+                line.Y1 = second_layer_index * neuron_size * 2.0 + neuron_size / 2.0
+                line.X2 = first_layer_margin + first_layer_neuron_index * (neuron_size + first_layer_margin) + neuron_size / 2.0
+                line.Y2 = first_layer_index * neuron_size * 2.0 + neuron_size / 2.0
                 line.StrokeThickness = 2
-                line.Stroke = SolidColorBrush(get_color(output_neuron.w[middle_neuron_index]))
+                line.Stroke = SolidColorBrush(get_color(second_layer_neuron.w[first_layer_neuron_index]))
                 self.canvas.AddChild(line)
 
 def get_color(value):

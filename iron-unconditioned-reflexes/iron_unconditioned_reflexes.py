@@ -43,6 +43,7 @@ class MyWindow(Window):
         
     def dispatcherTimer_Tick(self, sender, e):
         # if self.world.time == 150000:
+        #     self.world.constants.MIDDLE_LAYERS_SIZES = [randint(2,3) for _ in range(randint(1,3))]
         #     self.world.restart()
         #     self._renderer.restart()
 
@@ -56,7 +57,7 @@ class MyWindow(Window):
         self.world.update()
         self._renderer.render()
         if self.animal_window:
-            self.animal_window.draw_animal_brain()
+            self.animal_window.update()
 
     def timer_slider_ValueChanged(self, sender, e):        
         self.timer.Interval = TimeSpan(0, 0, 0, 0, sender.Value)
