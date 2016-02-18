@@ -102,28 +102,6 @@ class Layer(_AbstractLayer):
         _AbstractLayer.calculate(self, x)
         return [neuron.calculate(self.input_values) for neuron in self.neurons]
 
-    def teach_output_layer_by_sample(self, learn_rate, sample_out):
-        outs = [neuron.out for neuron in self]
-        for i in range(len(self)):
-            self[i].dEdNET = (outs[i] - sample_out[i]) * (1 - outs[i]**2)
-            self[i].dw = [-learn_rate * self[i].dEdNET * inp_value for inp_value in self.input_values]
-
-    # function for backpropagation teach algorithm
-    def _get_dEdOUT(self, target_neuron):
-        neuron_index = self.input.index(target_neuron)
-        return sum((neuron.w[neuron_index] * neuron.dEdNET for neuron in self))
-
-    def teach_middle_layer(self, learn_rate):
-        for ni in range(len(self)):
-            neuron = self[ni]
-
-            dEdOUT = sum(( \
-                next_layer._get_dEdOUT(neuron) for next_layer in self.listeners if isinstance(next_layer, Layer) \
-                ))
-            neuron.dEdNET = (1 - neuron.out**2) * dEdOUT
-
-            neuron.dw = [-learn_rate * neuron.dEdNET * inp_value for inp_value in self.input_values]            
-
 
 class ContextLayer(_AbstractLayer):
     def __init__(self, size, input):

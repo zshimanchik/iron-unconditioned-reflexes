@@ -8,15 +8,17 @@ class NeuralNetwork:
         self.time = 0
 
         self.input_layer = InputLayer(shape[0])
-
-        self.middle_layer = Layer(shape[1], self.input_layer.neurons)
-        self.input_layer.listeners.append(self.middle_layer)
-
-        self.output_layer = Layer(shape[2], self.middle_layer.neurons)
-        self.middle_layer.listeners.append(self.output_layer)
-
         self.layers.append(self.input_layer)
-        self.layers.append(self.middle_layer)
+
+        prev_layer = self.input_layer
+        for i in range(1, len(shape)-1):
+            cur_layer = Layer(shape[i], prev_layer.neurons)
+            prev_layer.listeners.append(cur_layer)
+            self.layers.append(cur_layer)
+            prev_layer = cur_layer
+
+        self.output_layer = Layer(shape[-1], prev_layer.neurons)
+        prev_layer.listeners.append(self.output_layer)
         self.layers.append(self.output_layer)
 
         self._reset_layers_states()
@@ -29,10 +31,8 @@ class NeuralNetwork:
 
     def calculate(self, x):
         """
-        calculate vector x, if random value is set, add to result vector value (random()*2-1)*random_value
-        :param x: input vector
-        :param random_value: random range added to result vector
-        :return: result of network calculation
+        :param x: list of input values
+        :return: list of values which is result of network calculation
         """
         self.input_layer.input_values = x
         done = False
@@ -49,18 +49,3 @@ class NeuralNetwork:
     def _reset_layers_states(self):
         for layer in self:
             layer.reset_state()
-
-    def teach_by_sample(self, database, teach_value=0.5):
-        err = 0
-        for inp, out in database:
-            net_out = self.calculate(inp)
-            self.output_layer.teach_output_layer_by_sample(teach_value, out)
-
-            # teach middle layers
-            self.middle_layer.teach_middle_layer(teach_value)
-
-            for layer in self:
-                layer.commit_teach()
-
-            err += sum([(no-o) ** 2 for no, o in zip(net_out, out)])
-        return err / len(database)
