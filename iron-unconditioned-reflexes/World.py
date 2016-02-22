@@ -30,17 +30,17 @@ class World(object):
         self._init_workers()
 
     def _calculate_chunks_sizes(self):
-        self.FOOD_CHUNK_SIZE = self.constants.EATING_DISTANCE + self.constants.ANIMAL_SIZE
-        self.FEMALE_CHUNK_SIZE = self.constants.SEX_DISTANCE + self.constants.ANIMAL_SIZE * 2
+        self.food_chunk_size = self.constants.EATING_DISTANCE + self.constants.ANIMAL_SIZE
+        self.female_chunk_size = self.constants.SEX_DISTANCE + self.constants.ANIMAL_SIZE * 2
 
-        FOOD_MAX_SMELL_SIZE = self.constants.APPEAR_FOOD_SIZE_MAX * self.constants.FOOD_SMELL_SIZE_RATIO
-        ANIMAL_MAX_SMELL_SIZE = self.constants.MAX_ANIMAL_SMELL_SIZE
-        self.SMELL_CHUNK_SIZE = max(FOOD_MAX_SMELL_SIZE, ANIMAL_MAX_SMELL_SIZE)
+        food_max_smell_size = self.constants.APPEAR_FOOD_SIZE_MAX * self.constants.FOOD_SMELL_SIZE_RATIO
+        animal_max_smell_size = self.constants.MAX_ANIMAL_SMELL_SIZE
+        self.smell_chunk_size = max(food_max_smell_size, animal_max_smell_size)
 
     def _init_workers(self):
         self.workers = []
         for _ in range(self.thread_count):
-            t = Thread(target=self.animal_worker, args=[self.queue])
+            t = Thread(target=self._animal_worker, args=[self.queue])
             t.daemon = True
             t.start()
             self.workers.append(t)
@@ -56,8 +56,8 @@ class World(object):
     def _make_random_food(self):
         return Food(
                 self,
-                randint(3, self.width),
-                randint(3, self.height),
+                randint(0, self.width),
+                randint(0, self.height),
                 randint(self.constants.APPEAR_FOOD_SIZE_MIN, self.constants.APPEAR_FOOD_SIZE_MAX)
         )
 
@@ -71,28 +71,9 @@ class World(object):
 
     def update(self):
         self.time += 1
-        self.food_chunks = self._make_empty_chunks(self.FOOD_CHUNK_SIZE)
-        self.female_chunks = self._make_empty_chunks(self.FEMALE_CHUNK_SIZE)
-        self.smell_chunks = self._make_empty_chunks(self.SMELL_CHUNK_SIZE)
-
-        for food in self.food:
-            self.check_in_bounds(food)
-            # food chunks
-            chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.FOOD_CHUNK_SIZE)
-            self.food_chunks[chunk_row][chunk_col].append(food)
-            # smell chunks
-            chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.SMELL_CHUNK_SIZE)
-            self.smell_chunks[chunk_row][chunk_col].append(food)
-
-        for animal in self.animals:
-            self.check_in_bounds(animal)
-            # female chunks
-            if animal.gender == Gender.FEMALE:
-                chunk_row, chunk_col = self.get_chunk_index(animal.x, animal.y, self.FEMALE_CHUNK_SIZE)
-                self.female_chunks[chunk_row][chunk_col].append(animal)
-            # smell chunks
-            chunk_row, chunk_col = self.get_chunk_index(animal.x, animal.y, self.SMELL_CHUNK_SIZE)
-            self.smell_chunks[chunk_row][chunk_col].append(animal)
+        self._prepare_empty_chunks()
+        self._split_food_to_chunks()
+        self._split_animals_to_chunks()
 
         for animal in self.animals:
             self.queue.put(animal)
@@ -103,36 +84,62 @@ class World(object):
         self._remove_dead_animals()
         self._clear_empty_food()
 
-        # add some food some fixed time
+        self._add_food_if_necessary()
+
+    def _prepare_empty_chunks(self):
+        self.food_chunks = self._make_empty_chunks(self.food_chunk_size)
+        self.female_chunks = self._make_empty_chunks(self.female_chunk_size)
+        self.smell_chunks = self._make_empty_chunks(self.smell_chunk_size)
+
+    def _split_food_to_chunks(self):
+        for food in self.food:
+            self._check_in_bounds(food)
+            # food chunks
+            chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.food_chunk_size)
+            self.food_chunks[chunk_row][chunk_col].append(food)
+            # smell chunks
+            chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.smell_chunk_size)
+            self.smell_chunks[chunk_row][chunk_col].append(food)
+
+    def _split_animals_to_chunks(self):
+        for animal in self.animals:
+            self._check_in_bounds(animal)
+            # female chunks
+            if animal.gender == Gender.FEMALE:
+                chunk_row, chunk_col = self.get_chunk_index(animal.x, animal.y, self.female_chunk_size)
+                self.female_chunks[chunk_row][chunk_col].append(animal)
+            # smell chunks
+            chunk_row, chunk_col = self.get_chunk_index(animal.x, animal.y, self.smell_chunk_size)
+            self.smell_chunks[chunk_row][chunk_col].append(animal)
+
+    def _add_food_if_necessary(self):
         if self.time % self._food_timer == 0:
             for _ in range(self.constants.APPEAR_FOOD_COUNT):
-                self.food.append(
-                        Food(
-                                self,
-                                randint(0, self.width),
-                                randint(0, self.height),
-                                randint(self.constants.APPEAR_FOOD_SIZE_MIN, self.constants.APPEAR_FOOD_SIZE_MAX)
-                        )
-                )
-                
-    
-    def animal_worker(self, queue):
+                self.food.append(self._make_random_food())
+
+    def _animal_worker(self, queue):
         while True:
             animal = queue.get()
-            sensor_values = []
-            for pos in animal.sensors_positions:
-                sensor_values.extend(self.get_sensor_value(pos))
-            animal.sensor_values = sensor_values
-            food = self.get_closest_food(animal.x, animal.y, self.constants.EATING_DISTANCE + animal.size)
-            if food:
-                animal.eat(food)
-            animal.close_females = [female for female in self.adjacent_females(animal.x, animal.y) if close_enough(animal, female, self.constants.SEX_DISTANCE)]
-            animal.update()
+            self._update_animal(animal)
             queue.task_done()
+
+    def _update_animal(self, animal):
+        animal.sensor_values = self._get_sensors_values(animal)
+        food = self.get_closest_food(animal.x, animal.y, self.constants.EATING_DISTANCE + animal.size)
+        if food:
+            animal.eat(food)
+        animal.close_females = [female for female in self._adjacent_females(animal.x, animal.y) if close_enough(animal, female, self.constants.SEX_DISTANCE)]
+        animal.update()
+
+    def _get_sensors_values(self, animal):
+        sensor_values = []
+        for pos in animal.sensors_positions:
+            sensor_values.extend(self.get_sensor_value(pos))
+        return sensor_values
 
     def get_sensor_value(self, pos):
         res = [0] * self.constants.ANIMAL_SENSOR_DIMENSION
-        for smeller in self.adjacent_smells(*pos):
+        for smeller in self._adjacent_smells(*pos):
             try:
                 smell_strength = max(0, (1.0 - distance(smeller.x, smeller.y, pos[0], pos[1]) / smeller.smell_size)) ** 2
                 for i, v in enumerate(smeller.smell):
@@ -146,14 +153,14 @@ class World(object):
     def get_closest_food(self, x, y, max_distance):
         min_dist = 10000
         res = None
-        for food in self.adjacent_food(x, y):
+        for food in self._adjacent_food(x, y):
             dist = distance(x,y, food.x, food.y)
             if dist <= food.size+max_distance and dist < min_dist:
                 min_dist = dist
                 res = food
         return res
 
-    def check_in_bounds(self, animal):
+    def _check_in_bounds(self, animal):
         if animal.x > self.width:
             animal.x = self.width
         if animal.x < 0:
@@ -165,21 +172,21 @@ class World(object):
             animal.y = 0
 
     def _adjacent_elements(self, chunks, chunk_size, x, y):
-        for chunk_row, chunk_col in self.adjacent_chunks(chunks, *self.get_chunk_index(x, y, chunk_size)):
+        for chunk_row, chunk_col in self._adjacent_chunks(chunks, *self.get_chunk_index(x, y, chunk_size)):
             chunk = chunks[chunk_row][chunk_col]
             for element in chunk:
                 yield element
 
-    def adjacent_food(self, x, y):
-        return self._adjacent_elements(self.food_chunks, self.FOOD_CHUNK_SIZE, x, y)
+    def _adjacent_food(self, x, y):
+        return self._adjacent_elements(self.food_chunks, self.food_chunk_size, x, y)
 
-    def adjacent_females(self, x, y):
-        return self._adjacent_elements(self.female_chunks, self.FEMALE_CHUNK_SIZE, x, y)
+    def _adjacent_females(self, x, y):
+        return self._adjacent_elements(self.female_chunks, self.female_chunk_size, x, y)
 
-    def adjacent_smells(self, x, y):
-        return self._adjacent_elements(self.smell_chunks, self.SMELL_CHUNK_SIZE, x, y)
+    def _adjacent_smells(self, x, y):
+        return self._adjacent_elements(self.smell_chunks, self.smell_chunk_size, x, y)
 
-    def adjacent_chunks(self, chunks, row, col):
+    def _adjacent_chunks(self, chunks, row, col):
          r, c = row - 1, col -1
          for i in range(9):
              ri = r + i/3

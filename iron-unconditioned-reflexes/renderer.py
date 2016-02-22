@@ -97,9 +97,9 @@ class ChunksGrid(object):
         self._create_grids()
 
     def _create_grids(self):
-        self._create_grid(self.world.FEMALE_CHUNK_SIZE, Brushes.Gray)
-        self._create_grid(self.world.FOOD_CHUNK_SIZE, Brushes.Red)
-        self._create_grid(self.world.SMELL_CHUNK_SIZE, Brushes.DarkGreen)
+        self._create_grid(self.world.female_chunk_size, Brushes.Gray)
+        self._create_grid(self.world.food_chunk_size, Brushes.Red)
+        self._create_grid(self.world.smell_chunk_size, Brushes.DarkGreen)
 
     def _create_grid(self, size, brush):
         for row in range(1, int(self.world.height / size)+1):
