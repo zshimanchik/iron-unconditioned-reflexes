@@ -3,7 +3,7 @@ from math import sqrt
 from random import randint
 from threading import Thread
 
-from Animal import Animal, Food, Gender
+from animal import Animal, Food, Gender
 
 
 def distance(x1, y1, x2, y2):

@@ -5,7 +5,7 @@ from System.Windows.Media import Brushes, ScaleTransform, TranslateTransform, Ro
 
 import math
 
-from Animal import Gender
+from animal import Gender
 
 
 class Renderer(object):
