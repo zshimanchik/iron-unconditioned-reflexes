@@ -21,10 +21,10 @@ class WorldConstants(object):
 
     # neural_network shape
     ANIMAL_SENSOR_COUNT = 7
-    ANIMAL_SENSOR_DIMENSION = 3  # how many values in one sensor
+    ANIMAL_SENSOR_DIMENSION = 1  # how many values in one sensor
 
-    MIDDLE_LAYERS_SIZES = [2, 2]
-    OUTPUT_LAYER_SIZE = 3
+    MIDDLE_LAYERS_SIZES = [2, ]
+    OUTPUT_LAYER_SIZE = 2
 
     # DNA
     DNA_BASE = 4  # must be less or equals than 10, but greater than 1

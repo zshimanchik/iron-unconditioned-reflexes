@@ -14,7 +14,7 @@ class Food(object):
         self.x = x
         self.y = y
         self._size = size
-        self._smell = (0, 1, 0,)
+        self._smell = (1,)
         self._smell_size = self._size * self._world.constants.FOOD_SMELL_SIZE_RATIO
         # self.lock = Lock()
 
@@ -56,7 +56,7 @@ class Animal(object):
         self._y = randint(0, self.world.height)
         self.size = self.world.constants.ANIMAL_SIZE
         self.angle = 0
-        self._smell = (0.0, 0.0, 1.0, )
+        self._smell = (0,)
         self.smell_size = 0
 
         self.sensor_values = []
@@ -104,7 +104,7 @@ class Animal(object):
         if self.can_request_for_sex():
             self._search_partner_and_try_to_sex()
 
-        self.smell_size = (max(-1, self.answer[2]) + 1) / 2.0 * self.world.constants.MAX_ANIMAL_SMELL_SIZE
+        # self.smell_size = (max(-1, self.answer[2]) + 1) / 2.0 * self.world.constants.MAX_ANIMAL_SMELL_SIZE
         self.move(self.answer[0], self.answer[1])
 
     def can_request_for_sex(self):
