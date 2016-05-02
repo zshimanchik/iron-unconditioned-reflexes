@@ -16,10 +16,12 @@ class Food(object):
         self._size = size
         self._smell = (0, 1, 0,)
         self._smell_size = self._size * self._world.constants.FOOD_SMELL_SIZE_RATIO
+        self.beated = False
         # self.lock = Lock()
 
     def beating(self, value):
         # self.lock.acquire()
+        self.beated = True
         real_value = min(self.size, value)
         self.size -= real_value
         # self.lock.release()
@@ -41,6 +43,24 @@ class Food(object):
     @property
     def smell(self):
         return self._smell
+
+
+class Mammoth(object):
+    def __init__(self, world, x, y, size):
+        self._world = world
+        self.x = x
+        self.y = y
+        self.size = size
+        self.smell = (1, 0, 0,)
+        self.smell_size = self.size * self._world.constants.MAMMOTH_SMELL_SIZE_RATIO
+        self.life = 1
+
+    def beating(self, value):
+        self.life -= self._world.constants.MAMMOTH_BEAT_VALUE
+        return 0
+
+    def update(self):
+        self.life = min(1.0, self.life + self._world.constants.MAMMOTH_REGENERATION_VALUE)
 
 
 class Gender:

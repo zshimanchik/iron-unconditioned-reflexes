@@ -11,21 +11,66 @@ class SimulationScenario:
         self._world = self._main_window.world
         self._constants = self._world.constants
         self._world_number = 0
+        self._how_fast_three_animal_can_kill_mammoth = 200
         self._update_worldinfo_textblock()
+        self.last_animal_count_changed = 0
+        self.last_animal_count = 0
+
+    def _next_scenario(self):
+        self.last_animal_count_changed = 0
+        self._how_fast_three_animal_can_kill_mammoth -= 50
+        self._world.constants.MAMMOTH_BEAT_VALUE = 1.0 / self._how_fast_three_animal_can_kill_mammoth
+        self._world.constants.MAMMOTH_REGENERATION_VALUE = self._world.constants.MAMMOTH_BEAT_VALUE * 2.0
 
     def tic(self):
-        return  # comment it to enable
-        if self._world.time == 100:
-            self._popup_animal_window()
-            self._select_random_animal()
-        if self._world.time == 200:
-            self._close_animal_window()
-        if self._world.time == 150000:
-            self._world.constants.MIDDLE_LAYERS_SIZES = [randint(2,3) for _ in range(randint(1,3))]
+        self._restart_if_all_dead()
+        self._restart_if_all_one_gender()
+        self._restart_if_no_changes()
+        self._restart_if_performace_is_high()
+        # return  # comment it to enable
+        if self._world.time == 10:
+            self._render_trash(False)
+        if self._world.time == 300000:
+            self._render_trash(True)
+        if self._world.time == 400000:
+            self._next_scenario()
             self._world.restart()
             self._world_number += 1
             self._main_window._renderer.restart()
             self._update_worldinfo_textblock()
+
+    def _restart_if_all_dead(self):
+        if len(self._world.animals) <= 1:
+            self._restart()
+
+    def _restart_if_all_one_gender(self):
+        if self._only_one_gender():
+            self._restart()
+
+    def _restart_if_performace_is_high(self):
+        if self._main_window.performance > 4:
+            self._restart()
+
+    def _restart_if_no_changes(self):
+        if len(self._world.animals) != self.last_animal_count:
+            self.last_animal_count = len(self._world.animals)
+            self.last_animal_count_changed = self._world.time
+        else:
+            if self._world.time - self.last_animal_count_changed > 10000:
+                self._restart()
+
+    def _restart(self):
+        self._world.restart()
+        self._world_number += 1
+        self._main_window._renderer.restart()
+        self._update_worldinfo_textblock()
+
+    def _only_one_gender(self):
+        gender = self._world.animals[0].gender
+        for animal in self._world.animals:
+            if animal.gender != gender:
+                return False
+        return True
 
     def _popup_animal_window(self):
         self._main_window.MenuItem_Click(None, None)
@@ -44,8 +89,15 @@ class SimulationScenario:
         if self._main_window.animal_window:
             self._main_window.animal_window.animal = animal
 
+    def _render_trash(self, render=True):
+        self._main_window._renderer.draw_food_smell = render
+        self._main_window._renderer.draw_animal_smell = render
+        self._main_window._renderer.draw_mammoth_smell = render
+        self._main_window._renderer.draw_mammoth_death_distance = render
+
     def _update_worldinfo_textblock(self):
-        self._main_window.world_info_textblock.Text = "world number={}\nneural network: {}".format(
+        self._main_window.world_info_textblock.Text = "world number={}\nBEAT VALUE: {}\nRegen_val: {}".format(
             self._world_number,
-            "-".join(map(str, self._constants.NEURAL_NETWORK_SHAPE))
+            self._constants.MAMMOTH_BEAT_VALUE,
+            self._constants.MAMMOTH_REGENERATION_VALUE,
         )

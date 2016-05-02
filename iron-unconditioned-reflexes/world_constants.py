@@ -3,13 +3,19 @@ class WorldConstants(object):
 
     EATING_DISTANCE = 20
     EATING_VALUE = 0.03
-    FOOD_SMELL_SIZE_RATIO = 13.0
+    FOOD_SMELL_SIZE_RATIO = 7.0
 
     DEFAULT_TIMER = 60
 
     APPEAR_FOOD_COUNT = 3
     APPEAR_FOOD_SIZE_MIN = 6
     APPEAR_FOOD_SIZE_MAX = 10
+
+    MAMMOTH_COUNT = 5
+    MAMMOTH_SMELL_SIZE_RATIO = 5.0
+    MAMMOTH_BEAT_VALUE = 0.005
+    MAMMOTH_REGENERATION_VALUE = 0.01
+    FOOD_FROM_MAMMOTH_COUNT = 5
 
     SEX_DISTANCE = 20
 
@@ -23,7 +29,7 @@ class WorldConstants(object):
     ANIMAL_SENSOR_COUNT = 7
     ANIMAL_SENSOR_DIMENSION = 3  # how many values in one sensor
 
-    MIDDLE_LAYERS_SIZES = [2, 2]
+    MIDDLE_LAYERS_SIZES = [3, 3]
     OUTPUT_LAYER_SIZE = 3
 
     # DNA
@@ -40,7 +46,7 @@ class WorldConstants(object):
     MUTATE_CHANCE = 0.05
 
     ANIMAL_SIZE = 10
-    MAX_ANIMAL_SMELL_SIZE = 50
+    MAX_ANIMAL_SMELL_SIZE = 100
 
     def __init__(self):
         pass

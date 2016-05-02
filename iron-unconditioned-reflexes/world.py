@@ -1,9 +1,9 @@
 ﻿from Queue import Queue
 from math import sqrt
-from random import randint
+from random import randint, random
 from threading import Thread
 
-from animal import Animal, Food, Gender
+from animal import Animal, Food, Mammoth, Gender
 
 
 def distance(x1, y1, x2, y2):
@@ -50,7 +50,9 @@ class World(object):
         self.animals_to_add = []
         self.dead_animals = []
         self.empty_food = []
-        self.food = [self._make_random_food() for _ in range(80)]
+        self.dead_mammoths = []
+        self.food = [self._make_random_food() for _ in range(150)]
+        self.mammoths = [self._make_random_mammoth() for _ in range(10)]
         self.time = 0
 
     def _make_random_food(self):
@@ -58,6 +60,14 @@ class World(object):
                 self,
                 randint(0, self.width),
                 randint(0, self.height),
+                randint(self.constants.APPEAR_FOOD_SIZE_MIN, self.constants.APPEAR_FOOD_SIZE_MIN)
+        )
+
+    def _make_random_mammoth(self):
+        return Mammoth(
+                self,
+                randint(0, self.width / 2),
+                randint(0, self.height / 2),
                 randint(self.constants.APPEAR_FOOD_SIZE_MIN, self.constants.APPEAR_FOOD_SIZE_MAX)
         )
 
@@ -73,7 +83,11 @@ class World(object):
         self.time += 1
         self._prepare_empty_chunks()
         self._split_food_to_chunks()
+        self._split_mammoths_to_chunks()
         self._split_animals_to_chunks()
+
+        for mammoth in self.mammoths:
+            mammoth.update()
 
         for animal in self.animals:
             self.queue.put(animal)
@@ -83,8 +97,10 @@ class World(object):
         self.animals_to_add = []
         self._remove_dead_animals()
         self._clear_empty_food()
+        self._transform_dead_mammoths()
 
         self._add_food_if_necessary()
+        self._add_mammoth_if_necessary()
 
     def _prepare_empty_chunks(self):
         self.food_chunks = self._make_empty_chunks(self.food_chunk_size)
@@ -101,6 +117,16 @@ class World(object):
             chunk_row, chunk_col = self.get_chunk_index(food.x, food.y, self.smell_chunk_size)
             self.smell_chunks[chunk_row][chunk_col].append(food)
 
+    def _split_mammoths_to_chunks(self):
+        for mammoth in self.mammoths:
+            self._check_in_bounds(mammoth)
+            # food chunks
+            chunk_row, chunk_col = self.get_chunk_index(mammoth.x, mammoth.y, self.food_chunk_size)
+            self.food_chunks[chunk_row][chunk_col].append(mammoth)
+            # smell chunks
+            chunk_row, chunk_col = self.get_chunk_index(mammoth.x, mammoth.y, self.smell_chunk_size)
+            self.smell_chunks[chunk_row][chunk_col].append(mammoth)
+
     def _split_animals_to_chunks(self):
         for animal in self.animals:
             self._check_in_bounds(animal)
@@ -116,6 +142,11 @@ class World(object):
         if self.time % self._food_timer == 0:
             for _ in range(self.constants.APPEAR_FOOD_COUNT):
                 self.food.append(self._make_random_food())
+
+    def _add_mammoth_if_necessary(self):
+        if self.time % self._food_timer == 0 and len(self.mammoths) < self.constants.MAMMOTH_COUNT:
+            self.mammoths.append(self._make_random_mammoth())
+
 
     def _animal_worker(self, queue):
         while True:
@@ -211,6 +242,20 @@ class World(object):
                 self.food.remove(food)
                 self.empty_food.append(food)
 
+    def _transform_dead_mammoths(self):
+        self.dead_mammoths = []
+        for mammoth in self.mammoths[:]:
+            if mammoth.life <= 0:
+                self.mammoths.remove(mammoth)
+                self.dead_mammoths.append(mammoth)
+                self._make_food_from_mammoth(mammoth)
+
+    def _make_food_from_mammoth(self, mammoth):
+        for _ in range(self.constants.FOOD_FROM_MAMMOTH_COUNT):
+            x = mammoth.x + (mammoth.smell_size*random()*2 - mammoth.smell_size)*0.5
+            y = mammoth.y + (mammoth.smell_size*random()*2 - mammoth.smell_size)*0.5
+            self.food.append(Food(self, x, y, mammoth.size))
+
     def add_animal(self, animal):
         self.animals_to_add.append(animal)
 
@@ -229,3 +274,10 @@ class World(object):
             [[] for _ in range(int(self.width / chunk_size) + 1)]
             for _ in range(int(self.height / chunk_size) + 1)
         ]
+
+    def add_mammoth(self, x, y):
+        mammoth = Mammoth(
+            self, x, y,
+            randint(self.constants.APPEAR_FOOD_SIZE_MIN, self.constants.APPEAR_FOOD_SIZE_MAX)
+        )
+        self.mammoths.append(mammoth)

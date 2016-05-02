@@ -21,6 +21,7 @@ class MyWindow(Window):
         self.selected_animal = None
         self.mouse_start_point = Point(0, 0)
         self.start_time = time()
+        self.performance = 0
 
         self.world = world.World(500, 200, constants=WorldConstants())
 
@@ -35,6 +36,8 @@ class MyWindow(Window):
         self._renderer.draw_eat_distance = self.eat_distance_checkBox.IsChecked
         self._renderer.draw_chunks = self.chunks_checkBox.IsChecked
         self._renderer.draw_animal_smell = self.animal_smell_checkBox.IsChecked
+        self._renderer.draw_mammoth_smell = self.mammoth_smell_checkBox.IsChecked
+        self._renderer.draw_mammoth_death_distance = self.mammoth_death_distance_checkBox.IsChecked
 
         self._simulation_scenario = SimulationScenario(self)
 
@@ -56,14 +59,14 @@ class MyWindow(Window):
 
     def _check_performance(self):
         if self.world.time % 10 == 0:
-            performance = (time() - self.start_time) / 10.0
-            self.performance_textblock.Text = "performance={}".format(performance)
+            self.performance = (time() - self.start_time) / 10.0
+            self.performance_textblock.Text = "performance={}".format(self.performance)
             self.start_time = time()
 
     def _show_world_info_in_ui(self):
         self.world_time_textblock.Text = "world time={}".format(self.world.time)
         self.animal_count_textblock.Text = "animal count={}".format(len(self.world.animals))
-        self.food_count_textblock.Text = "food count={}".format(len(self.world.food))
+        self.food_count_textblock.Text = "food count={} mammoth={}".format(len(self.world.food), len(self.world.mammoths))
 
     def timer_slider_ValueChanged(self, sender, e):        
         self.timer.Interval = TimeSpan(0, 0, 0, 0, sender.Value)
@@ -78,6 +81,8 @@ class MyWindow(Window):
         self.world.height= int(sender.ActualHeight)
         
     def canvas_MouseRightButtonDown(self, sender, e):
+        point = e.GetPosition(self.canvas)
+        self.selected_animal = self.world.add_mammoth(point.X, point.Y)
         self.mouse_drag = True   
         self.mouse_start_point = e.GetPosition(self.canvas)
     
@@ -116,7 +121,13 @@ class MyWindow(Window):
 
     def animal_smell_changed(self, sender, e):
         self._renderer.draw_animal_smell = self.animal_smell_checkBox.IsChecked
-    
+
+    def mammoth_smell_changed(self, sender, e):
+        self._renderer.draw_mammoth_smell = self.mammoth_smell_checkBox.IsChecked
+
+    def mammoth_death_distance_changed(self, sender, e):
+        self._renderer.draw_mammoth_death_distance = self.mammoth_death_distance_checkBox.IsChecked
+
     def MenuItem_Click(self, sender, e):
         if self.animal_window is None or not self.animal_window.IsLoaded:
             self.animal_window = AnimalWindow()            

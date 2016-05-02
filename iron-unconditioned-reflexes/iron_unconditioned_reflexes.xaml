@@ -25,6 +25,8 @@
                 <CheckBox x:Name="food_smell_checkBox" IsChecked="false" Content="food smell" HorizontalAlignment="Left" Margin="208,100,0,0" VerticalAlignment="Top" Checked="food_smell_changed" Unchecked="food_smell_changed"/>
                 <CheckBox x:Name="eat_distance_checkBox" IsChecked="false" Content="eat distance" HorizontalAlignment="Left" Margin="208,121,0,0" VerticalAlignment="Top" Checked="eat_distance_changed" Unchecked="eat_distance_changed"/>
                 <CheckBox x:Name="animal_smell_checkBox" IsChecked="false" Content="animal smell" HorizontalAlignment="Left" Margin="208,141,0,0" VerticalAlignment="Top" Checked="animal_smell_changed" Unchecked="animal_smell_changed"/>
+                <CheckBox x:Name="mammoth_smell_checkBox" IsChecked="false" Content="mammoth smell" HorizontalAlignment="Left" Margin="208,161,0,0" VerticalAlignment="Top" Checked="mammoth_smell_changed" Unchecked="mammoth_smell_changed"/>
+                <CheckBox x:Name="mammoth_death_distance_checkBox" IsChecked="false" Content="death distance" HorizontalAlignment="Left" Margin="208,181,0,0" VerticalAlignment="Top" Checked="mammoth_death_distance_changed" Unchecked="mammoth_death_distance_changed"/>
             </Grid>
             <Canvas
                 x:Name="parent_canvas" DockPanel.Dock="Left">
