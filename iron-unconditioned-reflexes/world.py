@@ -52,7 +52,7 @@ class World(object):
         self.empty_food = []
         self.dead_mammoths = []
         self.food = [self._make_random_food() for _ in range(150)]
-        self.mammoths = [self._make_random_mammoth() for _ in range(10)]
+        self.mammoths = [self._make_random_mammoth() for _ in range(self.constants.MAMMOTH_COUNT)]
         self.time = 0
 
     def _make_random_food(self):
