@@ -56,7 +56,7 @@ class SimulationScenario:
             self.last_animal_count = len(self._world.animals)
             self.last_animal_count_changed = self._world.time
         else:
-            if self._world.time - self.last_animal_count_changed > 10000:
+            if self._world.time - self.last_animal_count_changed > 20000:
                 self._restart()
 
     def _restart(self):
