@@ -31,7 +31,7 @@ class MyWindow(Window):
 
         self._renderer = Renderer(self.canvas, self.world)
 
-        self.world.food_timer = self.food_slider.Value
+        self.food_slider.Value = self.world.food_timer
 
         self._renderer.draw_food_smell = self.food_smell_checkBox.IsChecked
         self._renderer.draw_eat_distance = self.eat_distance_checkBox.IsChecked

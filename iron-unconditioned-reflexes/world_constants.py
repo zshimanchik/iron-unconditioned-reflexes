@@ -7,7 +7,7 @@ class WorldConstants(object):
     EATING_VALUE = 0.03
     FOOD_SMELL_SIZE_RATIO = 7.0
 
-    DEFAULT_TIMER = 60
+    DEFAULT_TIMER = 60 * (500 * 200) / (WORLD_WIDTH * WORLD_HEIGHT)
 
     APPEAR_FOOD_COUNT = 3
     APPEAR_FOOD_SIZE_MIN = 6

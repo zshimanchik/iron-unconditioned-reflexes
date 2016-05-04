@@ -24,7 +24,7 @@ class World(object):
         self.height = height
 
         self.restart()
-        self._food_timer = self.constants.DEFAULT_TIMER
+        self.food_timer = self.constants.DEFAULT_TIMER
 
         self.queue = Queue()
         self._init_workers()
@@ -72,14 +72,6 @@ class World(object):
                 randint(self.height / 2, self.height),
                 randint(self.constants.APPEAR_FOOD_SIZE_MIN, self.constants.APPEAR_FOOD_SIZE_MAX)
         )
-
-    @property
-    def food_timer(self):
-        return int(self._food_timer * (200 * 500) / (self.width * self.height))
-
-    @food_timer.setter
-    def food_timer(self, value):
-        self._food_timer = int(value * (self.width * self.height) / (200 * 500))
 
     def update(self):
         self.time += 1
@@ -141,12 +133,12 @@ class World(object):
             self.smell_chunks[chunk_row][chunk_col].append(animal)
 
     def _add_food_if_necessary(self):
-        if self.time % self._food_timer == 0:
+        if self.time % self.food_timer == 0:
             for _ in range(self.constants.APPEAR_FOOD_COUNT):
                 self.food.append(self._make_random_food())
 
     def _add_mammoth_if_necessary(self):
-        if self.time % self._food_timer == 0 and len(self.mammoths) < self.constants.MAMMOTH_COUNT:
+        if self.time % self.food_timer == 0 and len(self.mammoths) < self.constants.MAMMOTH_COUNT:
             self.mammoths.append(self._make_random_mammoth())
 
 
