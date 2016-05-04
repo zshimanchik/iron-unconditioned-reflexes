@@ -44,7 +44,7 @@ class MyWindow(Window):
     def _create_and_start_timer(self):
         self.timer = DispatcherTimer()
         self.timer.Tick += self.dispatcherTimer_Tick
-        self.timer.Interval = TimeSpan(0, 0, 0, 0, self.timer_slider.Value)
+        self.timer.Interval = TimeSpan(0, 0, 0, 0, 1)
         self.timer.Start()
         
     def dispatcherTimer_Tick(self, sender, e):
@@ -143,6 +143,12 @@ class MyWindow(Window):
     
     def log_textbox_TextChanged(self, sender, e):
         sender.ScrollToEnd()
+    
+    def FreezeItem_Click(self, sender, e):
+        if self.timer.IsEnabled:
+            self.timer.Stop()
+        else:
+            self.timer.Start()
 
 
 if __name__ == '__main__':

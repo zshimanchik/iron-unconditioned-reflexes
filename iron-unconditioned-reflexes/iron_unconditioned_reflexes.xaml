@@ -6,27 +6,27 @@
         <DockPanel x:Name="dock_panel" LastChildFill="True">
             <Menu x:Name="menu" DockPanel.Dock="Top" Panel.ZIndex="1" >
                 <MenuItem Header="Animal window" Click="MenuItem_Click" />
+                <MenuItem Header="Freeze/Unfreeze" Click="FreezeItem_Click" />
             </Menu>
             <Grid DockPanel.Dock="Right" Width="300"  Background="#FFDEF9DC" Panel.ZIndex="1">
                 <TextBlock Text="{Binding Path=Value, ElementName=timer_slider, StringFormat=Timer: {0:#}}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <Slider x:Name="timer_slider" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="203" Interval="1" Maximum="300" ValueChanged="timer_slider_ValueChanged" SmallChange="5" LargeChange="30" Margin="94,0,0,0"/>
-                <TextBlock Text="{Binding Path=Value, ElementName=scale_slider, StringFormat=Scale: {0:#.##}}" HorizontalAlignment="Left" Margin="0,26,0,0" VerticalAlignment="Top"/>
-                <Slider x:Name="scale_slider" HorizontalAlignment="Left" Height="26" Margin="94,26,0,0" VerticalAlignment="Top" Width="203" Interval="1" Maximum="3" Minimum="0.3" ValueChanged="scale_slider_ValueChanged" Value="1" SelectionEnd="1" SelectionStart="1"/>
-                <TextBlock Text="{Binding Path=Value, ElementName=food_slider, StringFormat=Food: {0:#}}" HorizontalAlignment="Left" Margin="0,55,0,0" VerticalAlignment="Top"/>
-                <Slider x:Name="food_slider" HorizontalAlignment="Left" Margin="94,49,0,0" VerticalAlignment="Top" Width="203" Minimum="5" Maximum="500" SmallChange="5" Value="60" ValueChanged="food_slider_ValueChanged"/>
+                <TextBlock Text="{Binding Path=Value, ElementName=scale_slider, StringFormat=Scale: {0:#.##}}" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top"/>
+                <Slider x:Name="scale_slider" HorizontalAlignment="Left" Height="26" Margin="94,0,0,0" VerticalAlignment="Top" Width="203" Interval="1" Maximum="3" Minimum="0.3" ValueChanged="scale_slider_ValueChanged" Value="1" SelectionEnd="1" SelectionStart="1"/>
+                <TextBlock Text="{Binding Path=Value, ElementName=food_slider, StringFormat=Food: {0:#}}" HorizontalAlignment="Left" Margin="0,26,0,0" VerticalAlignment="Top"/>
+                <Slider x:Name="food_slider" HorizontalAlignment="Left" Margin="94,26,0,0" VerticalAlignment="Top" Width="203" Minimum="5" Maximum="500" SmallChange="5" Value="60" ValueChanged="food_slider_ValueChanged"/>
 
-                <TextBlock x:Name="world_time_textblock" Text="world_time={}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,77,0,0"/>
-                <TextBlock x:Name="performance_textblock" Text="performance={}" HorizontalAlignment="Left" Margin="0,93,0,0" VerticalAlignment="Top"/>
-                <TextBlock x:Name="animal_count_textblock" Text="animal_count={}" HorizontalAlignment="Left" Margin="0,109,0,0" VerticalAlignment="Top"/>
-                <TextBlock x:Name="food_count_textblock" Text="food_count={}" HorizontalAlignment="Left" Margin="0,125,0,0" VerticalAlignment="Top"/>
-                <TextBlock x:Name="world_info_textblock" Text="world_info" HorizontalAlignment="Left" Margin="0,141,0,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                <TextBlock x:Name="world_time_textblock" Text="world_time={}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,55,0,0"/>
+                <TextBlock x:Name="performance_textblock" Text="performance={}" HorizontalAlignment="Left" Margin="0,71,0,0" VerticalAlignment="Top"/>
+                <TextBlock x:Name="animal_count_textblock" Text="animal_count={}" HorizontalAlignment="Left" Margin="0,87,0,0" VerticalAlignment="Top"/>
+                <TextBlock x:Name="food_count_textblock" Text="food_count={}" HorizontalAlignment="Left" Margin="0,108,0,0" VerticalAlignment="Top"/>
+                <TextBlock x:Name="world_info_textblock" Text="world_info" HorizontalAlignment="Left" Margin="2,124,0,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
 
-                <CheckBox x:Name="chunks_checkBox" IsChecked="false" Content="draw chunks" HorizontalAlignment="Left" Margin="207,80,0,0" VerticalAlignment="Top" Checked="chunks_changed" Unchecked="chunks_changed" />
-                <CheckBox x:Name="food_smell_checkBox" IsChecked="false" Content="food smell" HorizontalAlignment="Left" Margin="208,100,0,0" VerticalAlignment="Top" Checked="food_smell_changed" Unchecked="food_smell_changed"/>
-                <CheckBox x:Name="eat_distance_checkBox" IsChecked="false" Content="eat distance" HorizontalAlignment="Left" Margin="208,121,0,0" VerticalAlignment="Top" Checked="eat_distance_changed" Unchecked="eat_distance_changed"/>
-                <CheckBox x:Name="animal_smell_checkBox" IsChecked="false" Content="animal smell" HorizontalAlignment="Left" Margin="208,141,0,0" VerticalAlignment="Top" Checked="animal_smell_changed" Unchecked="animal_smell_changed"/>
-                <CheckBox x:Name="mammoth_smell_checkBox" IsChecked="false" Content="mammoth smell" HorizontalAlignment="Left" Margin="208,161,0,0" VerticalAlignment="Top" Checked="mammoth_smell_changed" Unchecked="mammoth_smell_changed"/>
-                <CheckBox x:Name="mammoth_death_distance_checkBox" IsChecked="false" Content="death distance" HorizontalAlignment="Left" Margin="208,181,0,0" VerticalAlignment="Top" Checked="mammoth_death_distance_changed" Unchecked="mammoth_death_distance_changed"/>
+                <CheckBox x:Name="chunks_checkBox" IsChecked="false" Content="draw chunks" HorizontalAlignment="Left" Margin="208,55,0,0" VerticalAlignment="Top" Checked="chunks_changed" Unchecked="chunks_changed" />
+                <CheckBox x:Name="food_smell_checkBox" IsChecked="false" Content="food smell" HorizontalAlignment="Left" Margin="208,71,0,0" VerticalAlignment="Top" Checked="food_smell_changed" Unchecked="food_smell_changed"/>
+                <CheckBox x:Name="eat_distance_checkBox" IsChecked="false" Content="eat distance" HorizontalAlignment="Left" Margin="208,87,0,0" VerticalAlignment="Top" Checked="eat_distance_changed" Unchecked="eat_distance_changed"/>
+                <CheckBox x:Name="animal_smell_checkBox" IsChecked="false" Content="animal smell" HorizontalAlignment="Left" Margin="208,103,0,0" VerticalAlignment="Top" Checked="animal_smell_changed" Unchecked="animal_smell_changed"/>
+                <CheckBox x:Name="mammoth_smell_checkBox" IsChecked="false" Content="mammoth smell" HorizontalAlignment="Left" Margin="208,119,0,0" VerticalAlignment="Top" Checked="mammoth_smell_changed" Unchecked="mammoth_smell_changed"/>
+                <CheckBox x:Name="mammoth_death_distance_checkBox" IsChecked="false" Content="death distance" HorizontalAlignment="Left" Margin="208,135,0,0" VerticalAlignment="Top" Checked="mammoth_death_distance_changed" Unchecked="mammoth_death_distance_changed"/>
             </Grid>
             <TextBox x:Name="log_textbox"  DockPanel.Dock="Right" Panel.ZIndex="1" TextWrapping="WrapWithOverflow" Text="log:" Width="200" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" TextChanged="log_textbox_TextChanged"/>
             <Canvas
