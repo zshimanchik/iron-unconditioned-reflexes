@@ -1,5 +1,7 @@
 
 class WorldConstants(object):
+    WORLD_WIDTH = 900
+    WORLD_HEIGHT = 200
 
     EATING_DISTANCE = 20
     EATING_VALUE = 0.03
