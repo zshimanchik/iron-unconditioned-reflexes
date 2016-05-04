@@ -40,6 +40,8 @@ class MyWindow(Window):
         self._renderer.draw_mammoth_death_distance = self.mammoth_death_distance_checkBox.IsChecked
 
         self._simulation_scenario = SimulationScenario(self)
+        self.Width = self.world.width + self.log_textbox.Width + self.config_panel.Width + 16
+        self.Height = self.world.height + 59
 
     def _create_and_start_timer(self):
         self.timer = DispatcherTimer()
@@ -78,7 +80,8 @@ class MyWindow(Window):
         
     def canvas_SizeChanged(self, sender, e):
         self.world.width = int(sender.ActualWidth)
-        self.world.height= int(sender.ActualHeight)
+        self.world.height = int(sender.ActualHeight)
+        self.log_textbox.Text += "\nworld width={} height={}".format(self.world.width, self.world.height)
         
     def canvas_MouseRightButtonDown(self, sender, e):
         point = e.GetPosition(self.canvas)
