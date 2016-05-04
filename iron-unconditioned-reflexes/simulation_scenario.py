@@ -41,15 +41,15 @@ class SimulationScenario:
 
     def _restart_if_all_dead(self):
         if len(self._world.animals) <= 1:
-            self._restart()
+            self._restart("all are dead")
 
     def _restart_if_all_one_gender(self):
         if self._only_one_gender():
-            self._restart()
+            self._restart("only one gender left")
 
     def _restart_if_performace_is_high(self):
         if self._main_window.performance > 4:
-            self._restart()
+            self._restart("Too high performance")
 
     def _restart_if_no_changes(self):
         if len(self._world.animals) != self.last_animal_count:
@@ -57,9 +57,14 @@ class SimulationScenario:
             self.last_animal_count_changed = self._world.time
         else:
             if self._world.time - self.last_animal_count_changed > 20000:
-                self._restart()
+                self._restart("too many time there are no changes")
 
-    def _restart(self):
+    def _restart(self, reason=None):
+        self._main_window.log_textbox.Text += "\n world #{} ended on {} cycle, cause: {}".format(
+                                                                                            self._world_number,
+                                                                                            self._world.time,
+                                                                                            reason
+                                                                                        )
         self._world.restart()
         self._world_number += 1
         self._main_window._renderer.restart()
