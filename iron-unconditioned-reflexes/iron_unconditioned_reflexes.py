@@ -140,6 +140,9 @@ class MyWindow(Window):
         self._renderer.selected_animal = self.selected_animal
         if self.animal_window:
             self.animal_window.animal = self.selected_animal
+    
+    def log_textbox_TextChanged(self, sender, e):
+        sender.ScrollToEnd()
 
 
 if __name__ == '__main__':

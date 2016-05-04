@@ -1,7 +1,7 @@
 ﻿<Window 
        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-       Title="iron-unconditioned-reflexes" Height="251.401" Width="1200.703">
+       Title="iron-unconditioned-reflexes" Height="251.401" Width="1400.703">
     <Grid x:Name="grid" Margin="0,0,0,0">
         <DockPanel x:Name="dock_panel" LastChildFill="True">
             <Menu x:Name="menu" DockPanel.Dock="Top" Panel.ZIndex="1" >
@@ -28,6 +28,7 @@
                 <CheckBox x:Name="mammoth_smell_checkBox" IsChecked="false" Content="mammoth smell" HorizontalAlignment="Left" Margin="208,161,0,0" VerticalAlignment="Top" Checked="mammoth_smell_changed" Unchecked="mammoth_smell_changed"/>
                 <CheckBox x:Name="mammoth_death_distance_checkBox" IsChecked="false" Content="death distance" HorizontalAlignment="Left" Margin="208,181,0,0" VerticalAlignment="Top" Checked="mammoth_death_distance_changed" Unchecked="mammoth_death_distance_changed"/>
             </Grid>
+            <TextBox x:Name="log_textbox"  DockPanel.Dock="Right" Panel.ZIndex="1" TextWrapping="WrapWithOverflow" Text="log:" Width="200" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" TextChanged="log_textbox_TextChanged"/>
             <Canvas
                 x:Name="parent_canvas" DockPanel.Dock="Left">
                 <Canvas x:Name="canvas" SizeChanged="canvas_SizeChanged" Background="#FFD8D8D8" MouseMove="canvas_MouseMove" MouseWheel="canvas_MouseWheel" Width="{Binding ActualWidth, ElementName=parent_canvas, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=parent_canvas, Mode=OneWay}" MouseLeave="canvas_MouseLeave" MouseRightButtonDown="canvas_MouseRightButtonDown" MouseRightButtonUp="canvas_MouseRightButtonUp" MouseLeftButtonDown="canvas_MouseLeftButtonDown">
