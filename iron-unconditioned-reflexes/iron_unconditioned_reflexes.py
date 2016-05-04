@@ -71,9 +71,6 @@ class MyWindow(Window):
         self.animal_count_textblock.Text = "animal count={}".format(len(self.world.animals))
         self.food_count_textblock.Text = "food count={} mammoth={}".format(len(self.world.food), len(self.world.mammoths))
 
-    def timer_slider_ValueChanged(self, sender, e):        
-        self.timer.Interval = TimeSpan(0, 0, 0, 0, sender.Value)
-    
     def scale_slider_ValueChanged(self, sender, e):
         # todo fix this crutch
         if hasattr(self,'canvas'):
