@@ -30,14 +30,14 @@ class SimulationScenario:
         # return  # comment it to enable
         if self._world.time == 10:
             self._render_trash(False)
-        if self._world.time == 300000:
+        if self._world.time == 100000:
             self._render_trash(True)
-        if self._world.time == 400000:
-            self._next_scenario()
-            self._world.restart()
-            self._world_number += 1
-            self._main_window._renderer.restart()
-            self._update_worldinfo_textblock()
+        # if self._world.time == 400000:
+        #     self._next_scenario()
+        #     self._world.restart()
+        #     self._world_number += 1
+        #     self._main_window._renderer.restart()
+        #     self._update_worldinfo_textblock()
 
     def _restart_if_all_dead(self):
         if len(self._world.animals) <= 1:

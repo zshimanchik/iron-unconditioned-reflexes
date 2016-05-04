@@ -23,7 +23,7 @@ class MyWindow(Window):
         self.start_time = time()
         self.performance = 0
 
-        self.world = world.World(500, 200, constants=WorldConstants())
+        self.world = world.World(900, 200, constants=WorldConstants())
 
         self.window = wpf.LoadComponent(self, 'iron_unconditioned_reflexes.xaml')
         self._create_and_start_timer()

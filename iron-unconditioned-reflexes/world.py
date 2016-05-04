@@ -1,6 +1,6 @@
 ﻿from Queue import Queue
 from math import sqrt
-from random import randint, random
+from random import randint, random, gauss
 from threading import Thread
 
 from animal import Animal, Food, Mammoth, Gender
@@ -46,19 +46,21 @@ class World(object):
             self.workers.append(t)
 
     def restart(self):
-        self.animals = [Animal(self) for _ in range(35)]
+        self.animals = [Animal(self) for _ in range(55)]
         self.animals_to_add = []
         self.dead_animals = []
         self.empty_food = []
         self.dead_mammoths = []
-        self.food = [self._make_random_food() for _ in range(150)]
+        self.food = [self._make_random_food() for _ in range(250)]
         self.mammoths = [self._make_random_mammoth() for _ in range(self.constants.MAMMOTH_COUNT)]
         self.time = 0
 
     def _make_random_food(self):
+        max_gauss_x = 4.5
+        x = min(abs(gauss(0, 1)), max_gauss_x)
         return Food(
                 self,
-                randint(0, self.width),
+                int(self.width * x / 2.5),
                 randint(0, self.height),
                 randint(self.constants.APPEAR_FOOD_SIZE_MIN, self.constants.APPEAR_FOOD_SIZE_MIN)
         )
@@ -66,8 +68,8 @@ class World(object):
     def _make_random_mammoth(self):
         return Mammoth(
                 self,
-                randint(0, self.width / 2),
-                randint(0, self.height / 2),
+                randint(self.width / 2, self.width),
+                randint(self.height / 2, self.height),
                 randint(self.constants.APPEAR_FOOD_SIZE_MIN, self.constants.APPEAR_FOOD_SIZE_MAX)
         )
 
